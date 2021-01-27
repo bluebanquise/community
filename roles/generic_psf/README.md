@@ -1,6 +1,6 @@
 # Generic Packages Services Folders and Files
 
-<span style="display:block;text-align:center">![generic_psf_logo.svg](generic_psf_logo.svg)</span>
+<p align="center">![generic_psf_logo.svg](generic_psf_logo.svg)</p>
 
 ## Owner
 
