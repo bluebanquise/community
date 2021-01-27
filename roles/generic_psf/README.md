@@ -1,6 +1,6 @@
 # Generic Packages Services Folders and Files
 
-<p align="center">![generic_psf_logo.svg](generic_psf_logo.svg)</p>
+<p align="center"><img src="https://raw.githubusercontent.com/bluebanquise/community/main/roles/generic_psf/generic_psf_logo.svg"></p>
 
 ## Owner
 
