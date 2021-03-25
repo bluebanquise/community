@@ -1,14 +1,27 @@
 ---
-prometheus:
-  scrape_interval: 1m
-  evaluation_interval: 2m
-  alertmanager:
-    group_wait: 1m
-    group_interval: 10m
-    repeat_interval: 3h
+prometheus_server_manage_prometheus: true
+prometheus_server_manage_alertmanager: true
+prometheus_server_manage_karma: true
+prometheus_server_manage_ipmi: false
+prometheus_server_manage_snmp: false
 
-prometheus_karma_username: admin
-prometheus_karma_password: admin
+prometheus_server_configuration:
+  global_scrape_interval: 1m
+  global_evaluation_interval: 2m
+
+prometheus_server_alertmanager_configuration:
+  group_wait: 1m
+  group_interval: 10m
+  repeat_interval: 3h
+
+prometheus_server_karma_username: admin
+prometheus_server_karma_password: admin
 
 prometheus_client: false
 prometheus_server: false
+
+prometheus_server_prometheus_host: localhost
+prometheus_server_alertmanager_host: localhost
+prometheus_server_karma_host: localhost
+prometheus_server_ipmi_host: localhost
+prometheus_server_snmp_host: localhost

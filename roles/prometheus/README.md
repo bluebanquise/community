@@ -5,24 +5,25 @@ Note: this role comply with BlueBanquise data-model 1.0.0.
 Table of content:
 
 - [Prometheus](#prometheus)
-  * [Description](#description)
-  * [General instructions](#general-instructions)
+  * [1. Description](#1-description)
+  * [2. General instructions](#2-general-instructions)
     + [Server or/and client](#server-or-and-client)
     + [Default ports](#default-ports)
-  * [Basic Server configuration](#basic-server-configuration)
+  * [3. Basic Server configuration](#3-basic-server-configuration)
     + [Prometheus configuration](#prometheus-configuration)
       - [Scraping](#scraping)
       - [Alerting](#alerting)
     + [Alertmanager configuration](#alertmanager-configuration)
     + [Karma configuration](#karma-configuration)
-  * [Basic Client configuration](#basic-client-configuration)
-  * [IPMI and SNMP](#ipmi-and-snmp)
-  * [Advanced usage](#advanced-usage)
+  * [4. Basic Client configuration](#4-basic-client-configuration)
+  * [5. IPMI and SNMP](#5-ipmi-and-snmp)
+  * [6. Advanced usage](#6-advanced-usage)
+    + [Set custom launch parameters](#set-custom-launch-parameters)
     + [Manipulate firewall](#manipulate-firewall)
     + [Splitting services](#splitting-services)
   * [Changelog](#changelog)
 
-## Description
+## 1. Description
 
 This role deploys Prometheus (server/client) with related ecosystem:
 
@@ -41,7 +42,7 @@ The role provides a basic configuration that should match 80% of the cluster's
 needs. An advanced configuration for specific usages is available and described
 after the basic part.
 
-## General instructions
+## 2. General instructions
 
 You can refer to this diagram to help understanding of the following readme.
 
@@ -72,7 +73,7 @@ the role.
 * Alertmanager is available by default at http://localhost:9093
 * Karma is available by default at http://localhost:8080 (admin / admin)
 
-## Basic Server configuration
+## 3. Basic Server configuration
 
 Playbook example:
 
@@ -135,7 +136,7 @@ the size of the cluster and the scrape_interval set here.
 
 These timings will apply to all exporters scraping. It is however possible to
 tune specific timings for each exporter. This part is covered in the client
-part of this readme.
+section of this readme.
 
 #### Alerting
 
@@ -144,14 +145,14 @@ and fired **by Prometheus** and not Alertmanager. Alertmanager is a tool to
 managed alerts that were fired by Prometheus (group alerts, send emails, etc).
 
 By default, the role will only add a simple alerts file into the
-/etc/prometheus/alerts folder. This file contains a basic alert that trigger when
+/etc/prometheus/alerts folder. This file contains a basic alert that triggers when
 an exporter is down.
 
 You will probably wish to add more alerts. You can add more files in this same
 directory, and these will be loaded by Prometheus at startup.
 
 To do so, either add them manually using another role (like [generic psf](https://github.com/bluebanquise/community/blob/main/roles/generic_psf)), or
-add them in the inventory by adding them in the file
+add them in the inventory by adding their YAML code in the file
 *inventory/group_vars/all/prometheus_alerts.yml*. For example:
 
 ```yaml
@@ -196,13 +197,13 @@ Few Karma parameters can be defined if needed.
 To set kerma username and password, use:
 
 ```yaml
-prometheus_karma_username: admin
-prometheus_karma_password: admin
+prometheus_server_karma_username: admin
+prometheus_server_karma_password: admin
 ```
 
 Default is admin / admin.
 
-## Basic Client configuration
+## 4. Basic Client configuration
 
 Playbook example:
 
@@ -216,17 +217,17 @@ Playbook example:
         prometheus_client: true
 ```
 
-The client side of the role install and start local exporters on nodes. It is
-also used during server side of the role to know what to scrap on which group
-of nodes.
+The client side of the role install and start local exporters on nodes.
+Its inventory data are also used by server side of the role to know what to
+scrap, on which group of nodes.
 
 Each exporter has its own http port. For example, node_exporter is available at
 http://localhost:9100 .
 
-In order for this role to install and start exporters on the host, a
+In order for this role to install and start exporters on the target host, a
 configuration is required in the Ansible inventory: a file is needed for each
 **equipment_profile** group that should be monitored.
-(See main documentation of BlueBanquise core to know what is an
+(See main documentation of BlueBanquise CORE to know what is an
 equipment_profile.)
 
 For example, to have equipment_typeL nodes installing and starting the
@@ -234,7 +235,7 @@ node_exporter exporter, you will need to create file
 *inventory/group_vars/equipment_typeL/monitoring.yml* with the following content:
 
 ```yaml
-ep_prometheus_exporters:
+prometheus_client_exporters:
   - name: node_exporter
     package: node_exporter
     service: node_exporter
@@ -253,7 +254,7 @@ nodes are from equipment group equipment_typeM, a file
 *inventory/group_vars/equipment_typeM/monitoring.yml* with the following content:
 
 ```yaml
-ep_prometheus_exporters:
+prometheus_client_exporters:
   - name: node_exporter
     package: node_exporter
     service: node_exporter
@@ -278,11 +279,12 @@ Note that ha_cluster_exporter and slurm_exporter are documented in the stack,
 but no packages are provided by the BlueBanquise project. Refer to the
 monitoring main documentation to get additional details about these exporters.
 
-## IPMI and SNMP
+## 5. IPMI and SNMP
 
 ipmi_exporter and snmp_exporter behave differently: they act as translation
 gateways between Prometheus and the target. Which means, if you wish for example
 to query IPMI data of a node, you do not install the exporter on the node itself.
+You query the ipmi_exporter, that will itself query the target for IPMI data.
 This is why, in the basic configuration, these two exporters are installed by
 the server part of the role and not the client part.
 
@@ -300,17 +302,17 @@ to be scraped. To do so, set **ep_prometheus_ipmi** or/and
 (or not) with exporters.
 
 ```yaml
-ep_prometheus_ipmi: true
-ep_prometheus_ipmi_scrape_interval: 5m
-ep_prometheus_ipmi_scrape_timeout: 5m
-ep_prometheus_snmp: false
-ep_prometheus_ipmi_scrape_interval:
-ep_prometheus_ipmi_scrape_timeout:
+prometheus_ipmi_scrape: true
+prometheus_ipmi_scrape_interval: 5m
+prometheus_ipmi_scrape_timeout: 5m
+prometheus_snmp_scrape: false
+prometheus_snmp_scrape_interval:
+prometheus_snmp_scrape_timeout:
 ```
 
 Since ipmi and snmp data are scraped using ipmi_exporter and snmp_exporter as
 "translators", the server part of the Prometheus role will take these
-variables into account to generate Prometheus, ipmi_exporter and snmp_exporter
+variables into account to generate Prometheus, ipmi_exporter and/or snmp_exporter
 configuration files.
 
 If variables are not set, role will consider them to false. This avoid
@@ -319,7 +321,38 @@ having to define them for each equipment_profile when not needed.
 Note that you can set custom scrape_interval and scrape_timeout for ipmi or snmp
 using dedicated variables shown in the example above.
 
-## Advanced usage
+Note also that ipmi_exporter will need `ep_equipment_authentication` dictionary
+to be set for each equipment_profile that needs ipmi data scraping.
+
+## 6. Advanced usage
+
+### Set custom launch parameters
+
+Since Prometheus ecosystem has been originally designed to run into containers,
+some major parameters are passed to the binary at launch. This is why the current
+role can update the systemd service file to integrate custom launch parameters.
+
+For example, to manipulate data retention (default 15 days) and ask for 60 days,
+set this variable:
+
+```yaml
+prometheus_server_launch_parameters:
+  - parameter: '--storage.tsdb.retention.time'
+    value: 60d
+```
+
+Note that with recent version of Prometheus, you can also set the data base
+maximum size instead. See more at https://www.robustperception.io/configuring-prometheus-storage-retention .
+
+To manipulate database path, set:
+
+```yaml
+prometheus_server_launch_parameters:
+  - parameter: '--storage.tsdb.path'
+    value: /prometheus
+```
+
+Etc. See all available options at https://gist.github.com/0x0I/eec137d55a26a16d836b84cbc186ab52 .
 
 ### Manipulate firewall
 
@@ -384,5 +417,6 @@ services.
 
 ## Changelog
 
+* 1.2.0: Role global enhancement. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>, johnnykeats <johnny.keats@outlook.com>
