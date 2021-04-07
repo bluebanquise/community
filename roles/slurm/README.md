@@ -2,31 +2,45 @@
 
 ## Description
 
-This role provides slurm configuration for server, client and login nodes.
+This role provides slurm configuration for controller (server), 
+computes (client) and submitters (often called login) nodes.
 
 ## Instructions
 
-**IMPORTANT**: first thing to do is to generate a new munge key file. To do so,
-go into files folder of the role and generate a new munge.key file using:
+**IMPORTANT**: before using the role, first thing to do is to generate a 
+new munge key file. To do so, generate a new munge.key file using:
 
 .. code-block:: text
 
-  dd if=/dev/urandom bs=1 count=1024 > munge.key
+  mungekey -c -k /etc/bluebanquise/roles/community/slurm/files/munge.key
 
 I do not provide default munge key file, as it is considered a security risk.
+(Too much users were using the example key).
 
 Then, in the inventory addon folder (inventory/group_vars/all/addons that should
 be created if not exist), add a slurm.yml file with the following content, tuned
 according to your needs:
 
 ```yaml
-  slurm:
-    slurm_packaging: after_17 # Can be before_17 or after_17. If using BlueBanquise packages, use after_17. For OpenHPC 1.3, use before_17.
-    cluster_name: bluebanquise
-    control_machine: management1
-    MpiDefault: pmi2 # Optional
-    nodes_equipment_groups:
-      - equipment_typeC
+  slurm_cluster_name: bluebanquise
+  slurm_control_machine: management1
+  slurm_computes_groups:
+    - equipment_typeC
+  slurm_partitions_list:
+    - computes_groups:
+        - equipment_typeC
+      partition_name: typeC
+      partition_configuration:
+        State: UP
+        MaxTime: "72:00:00"
+        DefaultTime: "24:00:00"
+        Default: yes
+  slurm_all_partition:
+      enable: true
+      partition_configuration:
+        State: UP
+        MaxTime: "72:00:00"
+        DefaultTime: "24:00:00"
 ```
 
 To use this role for all 3 types of nodes, simply add a vars in the playbook
@@ -47,16 +61,37 @@ For a compute node (client), use:
   - role: slurm
     tags: slurm
     vars:
-      slurm_profile: node
+      slurm_profile: compute
 ```
 
-And for a login (passive client), use:
+And for a submitter (passive client, login), use:
 
 ```yaml
   - role: slurm
     tags: slurm
     vars:
-      slurm_profile: passive
+      slurm_profile: submitter
+```
+
+### Accounting
+
+If you enable accounting, once the role has been applyied on 
+controller, check existence of the cluster in the database:
+
+```
+sacctmgr list cluster
+```
+
+If cluster is not here, add it using (assuming cluster name is *algoric*):
+
+```
+sacctmgr add cluster algoric
+```
+
+And check again if the cluster exist:
+
+```
+sacctmgr list cluster
 ```
 
 ## Input
