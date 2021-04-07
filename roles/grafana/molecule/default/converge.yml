@@ -1,9 +1,10 @@
 ---
 - name: Converge
   hosts: all
+  any_errors_fatal: true
   vars:
     start_services: true
-    enable_services: false
+    enable_services: true
   tasks:
     - name: "Enable firewall for EL8"
       set_fact:
@@ -14,3 +15,5 @@
     - name: "Include grafana"
       include_role:
         name: "grafana"
+      vars:
+        grafana_port: 9000
