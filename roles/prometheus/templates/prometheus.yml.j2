@@ -3,8 +3,9 @@
 ## {{ansible_managed}}
 
 global:
-  scrape_interval: {{prometheus.scrape_interval}}
-  evaluation_interval: {{prometheus.evaluation_interval}}
+{% for global_key, global_value in prometheus_server_configuration_global.items() %}
+  {{ global_key }}: {{ global_value }}
+{% endfor %}
 
 rule_files:
   - 'alerts/*.yml'
@@ -13,7 +14,9 @@ alerting:
   alertmanagers:
   - static_configs:
     - targets:
-      - localhost:9093 # Alertmanager is considered on the same host for now
+      - {{ prometheus_server_alertmanager_host }}:9093 # Alertmanager is considered on the same host for now
+
+{{ prometheus_server_prometheus_raw_configuration }}
 
 scrape_configs:
 
@@ -23,11 +26,13 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
+{{ prometheus_server_prometheus_raw_jobs | indent(2, True) }}
+
 
 # GENERIC EXPORTER
 # All equipment profiles and their exporters
 {% for equipment in j2_equipment_groups_list %}
-  {% if hostvars[groups[equipment][0]]['monitoring'] is defined and hostvars[groups[equipment][0]]['monitoring'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable %}
+  {% if hostvars[groups[equipment][0]]['prometheus_client_exporters'] is defined and hostvars[groups[equipment][0]]['prometheus_client_exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable %}
     {% for exporter, exporter_vars in hostvars[groups[equipment][0]]['monitoring']['exporters'].items() %}
       {% if exporter != "ipmi_exporter" and exporter != "snmp_exporter" %}
   - job_name: '{{ equipment }}_{{ exporter }}'
@@ -45,10 +50,10 @@ scrape_configs:
 
 # SNMP_EXPORTER
 {% for equipment in j2_equipment_groups_list %}
-  {% if hostvars[groups[equipment][0]]['monitoring'] is defined and hostvars[groups[equipment][0]]['monitoring'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable and "snmp_exporter" in hostvars[groups[equipment][0]]['monitoring']['exporters'] %}
+  {% if hostvars[groups[equipment][0]]['prometheus_snmp_scrape'] %}
   - job_name: 'snmp_{{equipment}}'
-    scrape_interval: {{ hostvars[groups[equipment][0]]['monitoring']['exporters']['snmp_exporter']['scrape_interval'] | default('') }}
-    scrape_timeout: {{ hostvars[groups[equipment][0]]['monitoring']['exporters']['snmp_exporter']['scrape_timeout'] | default('') }}
+    scrape_interval: {{ hostvars[groups[equipment][0]]['prometheus_snmp_scrape_interval'] | default('') }}
+    scrape_timeout: {{ hostvars[groups[equipment][0]]['prometheus_snmp_scrape_timeout'] | default('') }}
     static_configs:
      - targets:
     {% for node in groups[equipment] %}
@@ -64,19 +69,19 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: localhost:{{ hostvars[groups[equipment][0]]['monitoring']['exporters']['snmp_exporter']['port'] | default('9116') }}
+        replacement: {{ prometheus_server_snmp_exporter_host }}:9116
   {% endif %}
 {% endfor %}
 
 
 # BMC - IPMI_EXPORTER
 {% for equipment in j2_equipment_groups_list %}
-  {% if hostvars[groups[equipment][0]]['monitoring'] is defined and hostvars[groups[equipment][0]]['monitoring'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable and "ipmi_exporter" in hostvars[groups[equipment][0]]['monitoring']['exporters'] %}
+  {% if hostvars[groups[equipment][0]]['prometheus_ipmi_scrape'] %}
   - job_name: ipmi_{{equipment}}
     params:
       module: [{{equipment}}]
-    scrape_interval: {{ hostvars[groups[equipment][0]]['monitoring']['exporters']['ipmi_exporter']['scrape_interval'] | default('') }}
-    scrape_timeout: {{ hostvars[groups[equipment][0]]['monitoring']['exporters']['ipmi_exporter']['scrape_timeout'] | default('') }}
+    scrape_interval: {{ hostvars[groups[equipment][0]]['prometheus_ipmi_scrape_interval'] | default('') }}
+    scrape_timeout: {{ hostvars[groups[equipment][0]]['prometheus_ipmi_scrape_timeout'] | default('') }}
     metrics_path: /ipmi
     scheme: http
     static_configs:
@@ -101,7 +106,7 @@ scrape_configs:
     - separator: ;
       regex: .*
       target_label: __address__
-      replacement: localhost:{{ hostvars[groups[equipment][0]]['monitoring']['exporters']['ipmi_exporter']['port'] | default('9290') }}
+      replacement: {{ prometheus_server_ipmi_exporter_host }}:9290
       action: replace
   {% endif %}
 {% endfor %}

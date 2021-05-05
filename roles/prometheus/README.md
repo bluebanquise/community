@@ -21,6 +21,8 @@ Table of content:
     + [Set custom launch parameters](#set-custom-launch-parameters)
     + [Manipulate firewall](#manipulate-firewall)
     + [Splitting services](#splitting-services)
+    + [Adding raw prometheus.conf scraping jobs:](#adding-raw-prometheusconf-scraping-jobs-)
+    + [Adding raw prometheus.conf configuration](#adding-raw-prometheusconf-configuration)
   * [Changelog](#changelog)
 
 ## 1. Description
@@ -30,9 +32,10 @@ This role deploys Prometheus (server/client) with related ecosystem:
 * Prometheus (scrap metrics, store them, evaluate alerts)
 * Alertmanager (manage alerts by grouping them, sending mails, etc)
 * Karma (a dashboard for AlertManager)
+* Am-executor
 * ipmi_exporter
 * snmp_exporter
-* exporters:
+* other exporters:
    * slurm_exporter
    * node_exporter
    * ...
@@ -50,7 +53,7 @@ You can refer to this diagram to help understanding of the following readme.
 
 ### Server or/and client
 
-**Server part** of the role deploys Prometheus, Alertmanager, Karma,
+**Server part** of the role deploys Prometheus, Alertmanager, Karma, Am-executor,
 ipmi_exporter, snmp_exporter, and their respective configuration files and
 service files.
 
@@ -92,10 +95,12 @@ In the basic usage, the server role will install and setup the following tools:
 * Prometheus: scrap and store metrics, fire alerts.
 * Alertmanager: manage alerts fired by Prometheus.
 * Karma: dashboard to monitor alerts managed by Alertmanager.
+* Am-executor: trigger actions in case of alert fired.
 * ipmi_exporter: translate ipmi data to http scrapable by Prometheus.
 * snmp_exporter: translate snmp data to http scrapable by Prometheus.
 
-Which means all of these services will be running on the same management host.
+Which means all of these services will, by default, be running on the same
+management host.
 
 To manage what server part of the role should install and setup, defaults
 variables can be used. The following variables, with their default values shown
@@ -105,8 +110,9 @@ here, are available:
 prometheus_server_manage_prometheus: true
 prometheus_server_manage_alertmanager: true
 prometheus_server_manage_karma: true
-prometheus_server_manage_ipmi: false
-prometheus_server_manage_snmp: false
+prometheus_server_manage_am_executor: false
+prometheus_server_manage_ipmi_exporter: false
+prometheus_server_manage_snmp_exporter: false
 ```
 
 ### Prometheus configuration
@@ -118,18 +124,22 @@ You may wish to update these values to your needs, as these values set the
 different timings used by Prometheus.
 
 To do so, create file *inventory/group_vars/all/prometheus.yml* with the
-following content (tuned to your needs):
+following content (tuned to your needs, all global values can be defined):
 
 ```yaml
-prometheus_server_configuration:
-  global_scrape_interval: 1m
-  global_evaluation_interval: 2m
+prometheus_server_configuration_global:
+  scrape_interval: 1m
+  scrape_timeout: 20s
+  evaluation_interval: 2m
 ```
 
 To understand the meaning of these values, refer to:
 
 * https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config
 * https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval
+
+If you do not set a value, Prometheus will use its defaults values, described
+in the main documentation.
 
 **Warning**: size your storage available for Prometheus database according to
 the size of the cluster and the scrape_interval set here.
@@ -145,18 +155,31 @@ and fired **by Prometheus** and not Alertmanager. Alertmanager is a tool to
 managed alerts that were fired by Prometheus (group alerts, send emails, etc).
 
 By default, the role will only add a simple alerts file into the
-/etc/prometheus/alerts folder. This file contains a basic alert that triggers when
-an exporter is down.
+/etc/prometheus/alerts folder. This file contains very basic alerts related to
+exporters down or Prometheus own scraping.
 
-You will probably wish to add more alerts. You can add more files in this same
-directory, and these will be loaded by Prometheus at startup.
+The role also offers to install few other alerts, each related to a specific exporter.
+To install these additional alerts, simply enable them by adding them in the
+**prometheus_server_additional_alerts** list variable. The following additional
+alerts are available:
 
-To do so, either add them manually using another role (like [generic psf](https://github.com/bluebanquise/community/blob/main/roles/generic_psf)), or
+```yaml
+prometheus_server_additional_alerts:
+  - ipmi_exporter
+  - node_exporter
+```
+
+You will probably wish to add more alerts. You can add more files in the
+/etc/prometheus/alerts directory, and these will be loaded by Prometheus at
+startup.
+
+To do so, either add them manually using another role
+(like [generic psf](https://github.com/bluebanquise/community/blob/main/roles/generic_psf)), or
 add them in the inventory by adding their YAML code in the file
 *inventory/group_vars/all/prometheus_alerts.yml*. For example:
 
 ```yaml
-prometheus_server_alerts:
+prometheus_server_custom_alerts:
   - alert: HostOutOfMemory
     expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
     for: 2m
@@ -177,18 +200,44 @@ prometheus_server_alerts:
 
 ### Alertmanager configuration
 
-Alertmanager parameters can be updated by adding into the previously created
-file *inventory/group_vars/all/prometheus.yml* the following content, tuned to
-your needs:
+Alertmanager parameters are highly depending of users wishes.
+Considering that, it is difficult to not propose a fully customizable parameters
+file. This is why AlertManager whole configuration is contained in a single
+variable, called **prometheus_server_alertmanager_raw_configuration**. The default
+content is the following:
 
 ```yaml
-prometheus_server_alertmanager_configuration:
-  group_wait: 1m
-  group_interval: 10m
-  repeat_interval: 3h
+prometheus_server_alertmanager_raw_configuration: |
+  global:
+    smtp_smarthost: 'localhost:25'
+    smtp_from: 'alertmanager@your_domain'
+    smtp_require_tls: false
+
+  route:
+    group_by: ['alertname', 'job']
+    group_wait: 1m
+    group_interval: 10m
+    repeat_interval: 3h
+    receiver: sys-admin-team
+
+  receivers:
+    - name: 'sys-admin-team'
+      email_configs:
+        - to: 'sys-admin-team@site.com'
+
+  inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
 ```
 
-To understand meaning of these values, refer to [main documentation](https://prometheus.io/docs/alerting/latest/configuration/) or to [this page](https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval).
+If you wish to tune the content of this file, simply copy this variable in the
+inventory and tune it according to your needs.
+
+To understand meaning of these values, refer to [main documentation](https://prometheus.io/docs/alerting/latest/configuration/)
+or to [this page](https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval).
 
 ### Karma configuration
 
@@ -263,28 +312,28 @@ prometheus_client_exporters:
     package: ha_cluster_exporter
     service: ha_cluster_exporter
     port: 9664
-  - name: slurm_exporter
-    package: slurm_exporter
-    service: slurm_exporter
+  - name: prometheus_slurm_exporter
+    package: prometheus_slurm_exporter
+    service: prometheus_slurm_exporter
     scrape_interval: 5m
     scrape_timeout: 5m
-    port: 9817
+    port: 9101
 ```
 
 Note here that you can also set **scrape_interval** and **scrape_timeout**
 values for each exporter here. These will override default values only for this
 exporter.
 
-Note that ha_cluster_exporter and slurm_exporter are documented in the stack,
+Note also that ha_cluster_exporter is documented in the stack,
 but no packages are provided by the BlueBanquise project. Refer to the
-monitoring main documentation to get additional details about these exporters.
+monitoring main documentation to get additional details about this exporter.
 
 ## 5. IPMI and SNMP
 
 ipmi_exporter and snmp_exporter behave differently: they act as translation
 gateways between Prometheus and the target. Which means, if you wish for example
 to query IPMI data of a node, you do not install the exporter on the node itself.
-You query the ipmi_exporter, that will itself query the target for IPMI data.
+You query the ipmi_exporter, which will itself query the target for IPMI data.
 This is why, in the basic configuration, these two exporters are installed by
 the server part of the role and not the client part.
 
@@ -297,9 +346,8 @@ prometheus_server_manage_snmp: false
 ```
 
 You then need to specify for each equipment_profile if you wish ipmi or/and snmp
-to be scraped. To do so, set **ep_prometheus_ipmi** or/and
-**ep_prometheus_snmp** under ep_monitoring to true. This can be combined
-(or not) with exporters.
+to be scraped. To do so, set the following values in the same monitoring.yml file
+described in the client section of the role above.
 
 ```yaml
 prometheus_ipmi_scrape: true
@@ -337,19 +385,19 @@ set this variable:
 
 ```yaml
 prometheus_server_launch_parameters:
-  - parameter: '--storage.tsdb.retention.time'
-    value: 60d
+  storage.tsdb.retention.time: 60d
 ```
 
 Note that with recent version of Prometheus, you can also set the data base
 maximum size instead. See more at https://www.robustperception.io/configuring-prometheus-storage-retention .
 
-To manipulate database path, set:
+Another example, to manipulate database path, combine with a 60 days retention,
+set:
 
 ```yaml
 prometheus_server_launch_parameters:
-  - parameter: '--storage.tsdb.path'
-    value: /prometheus
+  storage.tsdb.retention.time: 60d
+  storage.tsdb.path: /prometheus
 ```
 
 Etc. See all available options at https://gist.github.com/0x0I/eec137d55a26a16d836b84cbc186ab52 .
@@ -369,12 +417,15 @@ prometheus_firewall_open: true
 prometheus_server_firewall_zone: internal
 ```
 
+Regarding client side, variable **prometheus_client_firewall_zone** allows to
+set the firewall zone to be open for exporters to listen for queries.
+
 ### Splitting services
 
 For some specific configurations, it is needed to split services over multiple
 hosts.
-For example to force ipmi_exporter and/or snmp_exporter to be deployed on another host than the one running
- Prometheus.
+For example to force ipmi_exporter and/or snmp_exporter to be deployed on
+another host than the one running Prometheus.
 
 To do so, disable ipmi and snmp on the hosts running Prometheus (host1), using this
 configuration as host1 dedicated hostvars :
@@ -383,8 +434,9 @@ configuration as host1 dedicated hostvars :
 prometheus_server_manage_prometheus: true
 prometheus_server_manage_alertmanager: true
 prometheus_server_manage_karma: true
-prometheus_server_manage_ipmi: false
-prometheus_server_manage_snmp: false
+prometheus_server_manage_am_executor: false
+prometheus_server_manage_ipmi_exporter: false
+prometheus_server_manage_snmp_exporter: false
 ```
 
 And activate them on the host you wish them to run (host2), using the opposite values for host2 dedicated hostvars:
@@ -393,8 +445,9 @@ And activate them on the host you wish them to run (host2), using the opposite v
 prometheus_server_manage_prometheus: false
 prometheus_server_manage_alertmanager: false
 prometheus_server_manage_karma: false
-prometheus_server_manage_ipmi: true
-prometheus_server_manage_snmp: true
+prometheus_server_manage_am_executor: false
+prometheus_server_manage_ipmi_exporter: true
+prometheus_server_manage_snmp_exporter: true
 ```
 
 To ensure everyone can communicate, set now these global variables in
@@ -404,8 +457,9 @@ group_vars/all (these variables are all set to localhost by default):
 prometheus_server_prometheus_host: host1
 prometheus_server_alertmanager_host: host1
 prometheus_server_karma_host: host1
-prometheus_server_ipmi_host: host2
-prometheus_server_snmp_host: host2
+prometheus_server_am_executor_host:
+prometheus_server_ipmi_exporter_host: host2
+prometheus_server_snmp_exporter_host: host2
 ```
 
 This can be used to spread all main services.
@@ -414,6 +468,27 @@ Note: if any `prometheus_server_manage_X` variable is not defined, it is conside
 
 Warning: if your firewall is running, you may need to open ports for desired
 services.
+
+### Adding raw prometheus.conf scraping jobs:
+
+It is possible to inject raw scraping jobs into the
+prometheus.conf file using the following multi lines variable:
+
+```yaml
+prometheus_server_prometheus_raw_jobs:
+```
+
+Note that you can combine this part and the [generic psf](https://github.com/bluebanquise/community/blob/main/roles/generic_psf)
+role to create advanced configurations, like High Availability with Virtual IP.
+
+### Adding raw prometheus.conf configuration
+
+It is possible to inject raw prometheus configuration parameters into the
+prometheus.conf file using the following multi lines variable:
+
+```yaml
+prometheus_server_prometheus_raw_configuration:
+```
 
 ## Changelog
 
