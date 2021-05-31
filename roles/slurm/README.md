@@ -1,5 +1,17 @@
 # Slurm
 
+- [Slurm](#slurm)
+  * [Description](#description)
+  * [Instructions](#instructions)
+    + [Munge key](#munge-key)
+    + [Apply role](#apply-role)
+    + [Configure main parameters](#configure-main-parameters)
+    + [Review default settings](#review-default-settings)
+    + [Additional slurm.conf settings](#additional-slurmconf-settings)
+    + [Optional nodes tuning](#optional-nodes-tuning)
+    + [Accounting](#accounting)
+  * [Changelog](#changelog)
+
 ## Description
 
 This role provides slurm configuration for controller (server),
@@ -138,6 +150,7 @@ sacctmgr list cluster
 
 ## Changelog
 
+* 1.1.0: Role major upgrade. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Update role, remove munge key. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Documentation. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

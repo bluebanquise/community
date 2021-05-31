@@ -26,7 +26,7 @@
 ### Updated roles
 
   - advanced_dhcp_server: prevent filename for none server type hosts. (#6)
-
+  - slurm: major role upgrade. (#11)
 
 ### New tools
 
