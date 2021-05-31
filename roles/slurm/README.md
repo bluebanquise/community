@@ -2,12 +2,16 @@
 
 ## Description
 
-This role provides slurm configuration for controller (server), 
+This role provides slurm configuration for controller (server),
 computes (client) and submitters (often called login) nodes.
+
+Note: this role requires *bluebanquise_filters* package to be installed.
 
 ## Instructions
 
-**IMPORTANT**: before using the role, first thing to do is to generate a 
+### Munge key
+
+**IMPORTANT**: before using the role, first thing to do is to generate a
 new munge key file. To do so, generate a new munge.key file using:
 
 .. code-block:: text
@@ -17,31 +21,7 @@ new munge key file. To do so, generate a new munge.key file using:
 I do not provide default munge key file, as it is considered a security risk.
 (Too much users were using the example key).
 
-Then, in the inventory addon folder (inventory/group_vars/all/addons that should
-be created if not exist), add a slurm.yml file with the following content, tuned
-according to your needs:
-
-```yaml
-  slurm_cluster_name: bluebanquise
-  slurm_control_machine: management1
-  slurm_computes_groups:
-    - equipment_typeC
-  slurm_partitions_list:
-    - computes_groups:
-        - equipment_typeC
-      partition_name: typeC
-      partition_configuration:
-        State: UP
-        MaxTime: "72:00:00"
-        DefaultTime: "24:00:00"
-        Default: yes
-  slurm_all_partition:
-      enable: true
-      partition_configuration:
-        State: UP
-        MaxTime: "72:00:00"
-        DefaultTime: "24:00:00"
-```
+### Apply role
 
 To use this role for all 3 types of nodes, simply add a vars in the playbook
 when loading the role. Extra vars is **slurm_profile**.
@@ -73,9 +53,71 @@ And for a submitter (passive client, login), use:
       slurm_profile: submitter
 ```
 
+### Configure main parameters
+
+Then, in the inventory addons folder (inventory/group_vars/all/addons that should
+be created if not exist), add a slurm.yml file with the following content, tuned
+according to your needs:
+
+```yaml
+  slurm_cluster_name: bluebanquise
+  slurm_control_machine: management1
+  slurm_computes_groups:
+    - equipment_typeC
+  slurm_partitions_list:
+    - computes_groups:
+        - equipment_typeC
+      partition_name: typeC
+      partition_configuration:
+        State: UP
+        MaxTime: "72:00:00"
+        DefaultTime: "24:00:00"
+        Default: yes
+  slurm_all_partition:
+      enable: true
+      partition_configuration:
+        State: UP
+        MaxTime: "72:00:00"
+        DefaultTime: "24:00:00"
+```
+
+Note: **partition_configuration** can cover all Slurm's available parameters for
+a partition.
+
+### Review default settings
+
+Check content of *defaults/main.yml* file and precedence variables you need to
+tune.
+
+### Additional slurm.conf settings
+
+It is possible to add more content into *slurm.conf* file using the multi-lines
+**slurm_slurm_conf_additional_content** variable.
+
+### Optional nodes tuning
+
+It is possible to set variable **slurm_extra_nodes_parameters** under
+**ep_hardware** in an *equipment_profile* to add more parameters on the nodes
+definition line.
+
+For example, setting:
+
+```yaml
+ep_hardware:
+  slurm_extra_nodes_parameters: Feature=XXXX Weight=YY
+```
+
+Would lead to:
+
+```
+NodeName=c[001-200] Procs=256 Sockets=8 CoresPerSocket=16 ThreadsPerCore=2 FeatureXXXX Weight=YY
+```
+
+In the final *slurm.conf* configuration file.
+
 ### Accounting
 
-If you enable accounting, once the role has been applyied on 
+If you enable accounting, once the role has been applied on
 controller, check existence of the cluster in the database:
 
 ```
@@ -93,38 +135,6 @@ And check again if the cluster exist:
 ```
 sacctmgr list cluster
 ```
-
-## Input
-
-Mandatory inventory vars:
-
-**hostvars[inventory_hostname]**
-
-* slurm_profile
-* slurm
-   * .cluster_name
-   * .control_machine
-   * .nodes_equipment_groups
-   * .slurm_packaging
-
-**hostvars[hosts]**
-
-* ep_hardware
-   * .cpu
-      * .core
-
-Optional inventory vars:
-
-**hostvars[inventory_hostname]**
-
-* slurm
-   * .MpiDefault
-
-## To be done
-
-* slurmdbd + mariadb
-* simple or static file (like nhc role)
-* faster execution (include_tasks)
 
 ## Changelog
 

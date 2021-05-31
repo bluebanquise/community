@@ -52,7 +52,7 @@ SelectType={{ slurm_SelectType }}
 ## Accounting
 AccountingStorageHost=localhost
 AccountingStorageType=accounting_storage/slurmdbd
-JobAcctGatherType=jobacct_gather/linux 
+JobAcctGatherType=jobacct_gather/linux
 {% endif %}
 
 ## Additional content if exist
@@ -75,9 +75,11 @@ JobAcctGatherType=jobacct_gather/linux
     {% if buffer.memory is defined and buffer.memory is not none %}
         {% set nodes_parameters = nodes_parameters + ' RealMemory=' + buffer.memory %}
     {% endif %}
-    {% for node in groups[computes_group] %}
-NodeName={{ node }} {{ nodes_parameters }}
-    {% endfor %}
+    {% if buffer.slurm_extra_nodes_parameters is defined and buffer.slurm_extra_nodes_parameters is not none %}
+        {% set nodes_parameters = nodes_parameters + slurm_extra_nodes_parameters %}
+    {% endif %}
+NodeName={{ groups[computes_group] | nodeset }} {{ nodes_parameters }}
+
   {% endif %}
 {% endfor %}
 
@@ -92,4 +94,3 @@ PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.pa
 PartitionName=all {% for arg, arg_value in slurm_all_partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={% for computes_group in slurm_computes_groups %}{% if groups[computes_group] is defined and groups[computes_group] is iterable %}{% for node in groups[computes_group] %}{% if loop.first %}{{node}}{% else %},{{node}}{% endif %}{% endfor %}{% endif %}{% endfor %}
 
 {% endif %}
-

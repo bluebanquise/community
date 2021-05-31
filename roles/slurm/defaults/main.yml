@@ -1,4 +1,7 @@
 ---
+## Computes configuration way to use (configfull vs configless)
+slurm_computes_config: configfull
+
 ## Files path
 slurm_StateSaveLocation: /var/spool/slurmd/StateSave
 slurm_SlurmdSpoolDir: /var/spool/slurmd/slurmd
@@ -38,4 +41,3 @@ slurm_ReturnToService: 0
 slurm_SchedulerType: sched/backfill
 slurm_SelectType: select/linear
 slurm_MpiDefault: pmi2
-
