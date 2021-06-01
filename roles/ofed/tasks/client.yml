@@ -1,7 +1,7 @@
 ---
 
 - name: package █ Install infiniband minimal packages
-  dnf:
+  package:
     name: "@Infiniband Support"
     state: present
   tags:
