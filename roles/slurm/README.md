@@ -26,9 +26,9 @@ Note: this role requires *bluebanquise_filters* package to be installed.
 **IMPORTANT**: before using the role, first thing to do is to generate a
 new munge key file. To do so, generate a new munge.key file using:
 
-.. code-block:: text
+.. code-block:: bash
 
-  mungekey -c -k /etc/bluebanquise/roles/community/slurm/files/munge.key
+   mungekey -c -k /etc/bluebanquise/roles/community/slurm/files/munge.key
 
 I do not provide default munge key file, as it is considered a security risk.
 (Too much users were using the example key).
