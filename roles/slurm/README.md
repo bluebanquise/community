@@ -26,10 +26,10 @@ Note: this role requires *bluebanquise_filters* package to be installed.
 **IMPORTANT**: before using the role, first thing to do is to generate a
 new munge key file. To do so, generate a new munge.key file using:
 
-.. code-block:: text
-
-   dd if=/dev/urandom bs=1 count=1024 > munge.key
-   mungekey -c -k /etc/bluebanquise/roles/community/slurm/files/munge.key
+```
+dd if=/dev/urandom bs=1 count=1024 > munge.key
+mungekey -c -k /etc/bluebanquise/roles/community/slurm/files/munge.key
+```
 
 I do not provide default munge key file, as it is considered a security risk.
 (Too much users were using the example key).
@@ -69,8 +69,27 @@ And for a submitter (passive client, login), use:
 ### Configure main parameters
 
 Then, in the inventory addons folder (inventory/group_vars/all/addons that should
-be created if not exist), add a slurm.yml file with the following content, tuned
-according to your needs:
+be created if not exist), add a slurm.yml file with the following minimal content,
+tuned according to your needs:
+
+```yaml
+  slurm_cluster_name: bluebanquise
+  slurm_control_machine: management1
+  slurm_computes_groups:
+    - equipment_typeC
+  slurm_all_partition:
+      enable: true
+      partition_configuration:
+        State: UP
+        Default: yes
+```
+
+Note: **partition_configuration** can cover all Slurm's available parameters for
+a partition.
+
+If you wish to create partitions, it is possible to define them. **computes_groups**
+can be any groups of nodes, as long as all nodes used in these groups are included
+in the groups defined under **slurm_computes_groups**. For example:
 
 ```yaml
   slurm_cluster_name: bluebanquise
@@ -80,12 +99,20 @@ according to your needs:
   slurm_partitions_list:
     - computes_groups:
         - equipment_typeC
+        - equipment_typeC_gpu
       partition_name: typeC
       partition_configuration:
         State: UP
         MaxTime: "72:00:00"
         DefaultTime: "24:00:00"
         Default: yes
+    - computes_groups:
+        - rack1
+        - rack2
+        - rack3
+      partition_name: rack_room1
+      partition_configuration:
+        State: UP
   slurm_all_partition:
       enable: true
       partition_configuration:
@@ -94,8 +121,8 @@ according to your needs:
         DefaultTime: "24:00:00"
 ```
 
-Note: **partition_configuration** can cover all Slurm's available parameters for
-a partition.
+This will work as long as all nodes included in groups `rack1 + rack2 + rack3`
+are all contained in groups `equipment_typeC + equipment_typeC_gpu`.
 
 ### Review default settings
 
