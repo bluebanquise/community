@@ -12,7 +12,7 @@ slurm_packages_to_install:
     - libmariadb3
     - mariadb-common
     - mariadb-server
-    - python3-mysql
+#    - python3-mysql
     - slurm-slurmdbd
   compute:
     - munge
