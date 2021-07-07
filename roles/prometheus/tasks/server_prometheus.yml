@@ -65,8 +65,29 @@
     owner: prometheus
     group: prometheus
     mode: 0640
-  when: prometheus_server_custom_alerts is defined and prometheus_server_custom_alerts is not None
+  when: prometheus_server_custom_alerts is defined and prometheus_server_custom_alerts is not none
   notify: service █ Restart prometheus service
+
+- name: file █ Create service needed directory
+  file:
+    path: /etc/systemd/system/prometheus.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  when: prometheus_server_launch_parameters is defined and prometheus_server_launch_parameters is not none
+
+- name: template █ Generate custom launch parameters for Prometheus
+  template:
+    src: custom_launch_parameters.conf.j2
+    dest: /etc/systemd/system/prometheus.service.d/custom_launch_parameters.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: systemd █ Reload systemd configuration
+  when: prometheus_server_launch_parameters is defined and prometheus_server_launch_parameters is not none
+  tags:
+    - template
 
 - meta: flush_handlers
 

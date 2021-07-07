@@ -379,6 +379,7 @@ to be set for each equipment_profile that needs ipmi data scraping.
 Since Prometheus ecosystem has been originally designed to run into containers,
 some major parameters are passed to the binary at launch. This is why the current
 role can update the systemd service file to integrate custom launch parameters.
+Use variable **prometheus_server_launch_parameters** to achieve this.
 
 For example, to manipulate data retention (default 15 days) and ask for 60 days,
 set this variable:
