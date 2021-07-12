@@ -12,7 +12,9 @@ It allows to configure:
 
 ## Instructions
 
-Grafana is available at `http://localhost:{{ grafana_port }}`
+Grafana is available by default at `http://localhost:3000`.
+
+Please continue reading if you want advanced options to modify the default behovior.
 
 ## Requirements
 
@@ -60,6 +62,11 @@ All variables which can be overridden are stored in [defaults/main.yml](defaults
 | `grafana_plugins` | [] |  List of Grafana plugins which should be installed |
 
 
+Security note:
+
+The role is always overwriting the admin password with the one defined in `default/main.yml` file.
+For better security, it is advised to put it encoded in this file: [Please refer to Ansible for implementation details](https://docs.ansible.com/ansible/latest/user_guide/vault.html#creating-encrypted-variables)
+
 Datasource example:
 
 ```yaml
@@ -71,14 +78,19 @@ grafana_datasources:
     basicAuth: false
 ```
 
-Dashboard example:
+Dashboards example:
+
+* Import dashboards from `https://grafana.com/api/dashboards` by ID/revision:
 
 ```yaml
 grafana_dashboards:
   - dashboard_id: 111
     revision_id: 1
     datasource: prometheus
+  - ...
 ```
+
+* Alternatively, you can put dashboard json files directly in the `grafana_dashboards_dir` local directory, and they will be imported.
 
 ### Playbook
 
@@ -102,22 +114,15 @@ If you want to enforce you own password or update any other variables in default
         grafana_plugins:
           - raintank-worldping-app
         grafana_dashboards:
-          - dashboard_id: '4271'
-            revision_id: '3'
-            datasource: 'Prometheus'
+          - dashboard_id: '111'
+            revision_id: '1'
+            datasource: 'prometheus'
         grafana_datasources:
-          - name: "Prometheus"
+          - name: "prometheus"
             type: "prometheus"
             access: "proxy"
             url: "http://127.0.0.1:9090"
-            basicAuth: true
-            basicAuthUser: "{{ grafana_security.admin_user }}"
-            basicAuthPassword: "{{ grafana_security.admin_password }}"
             isDefault: true
-            jsonData:
-              tlsAuth: false
-              tlsAuthWithCACert: false
-              tlsSkipVerify: true
 ```
 
 ## Changelog
