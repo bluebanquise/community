@@ -19,7 +19,7 @@ grafana_api_url: "{{ grafana_url }}"
 grafana_domain: "{{ ansible_fqdn | default(ansible_host) | default('localhost') }}"
 
 # Additional options for grafana "server" section
-# This section WILL omit options for: http_addr, http_port, domain, and root_url, as those settings are set by variables listed before
+# This section will omit options for: http_addr, http_port, domain, and root_url, as those settings are set by variables listed before
 grafana_server:
   protocol: http
   enforce_domain: false

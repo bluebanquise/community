@@ -1,4 +1,42 @@
 ---
+- name: dashboards █ Download Opensource Grafana dashboards
+  delegate_to: localhost
+  run_once: true
+  block:
+    - name: dashboards █ Create local grafana dashboard directory
+      tempfile:
+        state: directory
+      register: _tmp_dashboards
+      changed_when: false
+      check_mode: false
+
+    # Use curl to solve issue #77
+    - name: dashboards █ Download grafana dashboard from grafana.net to local directory
+      command: >
+        curl --fail --compressed
+        https://grafana.com/api/dashboards/{{ item.dashboard_id }}/revisions/{{ item.revision_id }}/download
+        -o {{ _tmp_dashboards.path }}/{{ item.dashboard_id }}.json
+      args:
+        creates: "{{ _tmp_dashboards.path }}/{{ item.dashboard_id }}.json"
+        warn: false
+      register: _download_dashboards
+      until: _download_dashboards is succeeded
+      retries: 5
+      delay: 2
+      with_items: "{{ grafana_dashboards }}"
+      when: grafana_dashboards | length > 0
+      changed_when: false
+      check_mode: false
+
+    - name: dashboards █ Set the correct data source name in the dashboard
+      replace:
+        dest: "{{ _tmp_dashboards.path }}/{{ item.dashboard_id }}.json"
+        regexp: '"(?:\${)?DS_[A-Z0-9_-]+(?:})?"'
+        replace: '"{{ item.datasource }}"'
+      changed_when: false
+      with_items: "{{ grafana_dashboards }}"
+      when: grafana_dashboards | length > 0
+
 - name: dashboards █ Import grafana dashboards through API
   uri:
     url: "{{ grafana_api_url }}/api/dashboards/db"
