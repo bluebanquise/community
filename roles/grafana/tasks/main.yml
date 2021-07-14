@@ -119,7 +119,7 @@
     msg: "grafana-cli failed to set password {{ grafana_cli_var.stderr }}"
   when:
     - grafana_cli_var is defined
-    - grafafa_cli_var.rc != 0
+    - grafana_cli_var.rc != 0
 
 - include_tasks: api_keys.yml
   when: grafana_api_keys | length > 0
