@@ -20,4 +20,3 @@
         grafana_port: 9000
         grafana_security:
           - admin_password: "testtest"
-
