@@ -69,15 +69,8 @@
   tags:
     - plugins
 
-- name: "service █ Restart services"
-  service:
-    name: "{{ item  }}"
-    state: restarted
-    daemon_reload: true
-  with_items: "{{ grafana_services_to_start }}"
-  when:
-    - "'service' not in ansible_skip_tags"
-    - (start_services | bool)
+- name: service █ Force all notified handlers to run at this point
+  meta: flush_handlers
 
 - name: service █ Wait for grafana to start (http/s)
   wait_for:
