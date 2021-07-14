@@ -22,7 +22,7 @@
         name: "grafana"
       vars:
         - grafana_port: '9000'
-        - grafana_api_url: 'http://127.0.0.1:9080'
+        - grafana_api_url: 'http://127.0.0.1:9000'
         - grafana_datasources:
           - name: prometheus
             type: prometheus

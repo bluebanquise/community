@@ -30,3 +30,23 @@
       when:
         - ansible_facts.os_family == "RedHat"
         - ansible_facts.distribution_major_version == "7"
+
+    - name: "Configure ¨rometheus reposiroty for EL7"
+      yum_repository:
+        name: prometheus
+        description: "Prometheus repository"
+        baseurl: "https://packagecloud.io/prometheus-rpm/release/el/7/x86_64"
+        gpgcheck: 0
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "7"
+
+    - name: "Configure ¨rometheus reposiroty for EL8"
+      yum_repository:
+        name: prometheus
+        description: "Prometheus repository"
+        baseurl: "https://packagecloud.io/prometheus-rpm/release/el/8/x86_64"
+        gpgcheck: 0
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "8"
