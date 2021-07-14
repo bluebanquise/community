@@ -12,11 +12,24 @@
       when:
         - ansible_facts.os_family == "RedHat"
         - ansible_facts.distribution_major_version == "8"
-
+    - name: "Include Prometheus"
+      include_role:
+        name: "prometheus"
+      vars:
+        prometheus_server: True
     - name: "Include grafana"
       include_role:
         name: "grafana"
       vars:
-        grafana_port: 9000
-        grafana_security:
-          - admin_password: "testtest"
+        - grafana_port: '9000'
+        - grafana_api_url: 'http://127.0.0.1:9080'
+        - grafana_datasources:
+          - name: prometheus
+            type: prometheus
+            access: proxy
+            url: 'http://127.0.0.1:9090'
+            basicAuth: false
+        - grafana_dashboards:
+           - dashboard_id: '4271'
+             revision_id: '3'
+             datasource: prometheus
