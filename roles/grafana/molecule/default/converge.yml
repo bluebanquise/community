@@ -12,8 +12,12 @@
       when:
         - ansible_facts.os_family == "RedHat"
         - ansible_facts.distribution_major_version == "8"
+
     - name: "Include grafana"
       include_role:
         name: "grafana"
       vars:
         grafana_port: 9000
+        grafana_security:
+          - admin_password: "testtest"
+

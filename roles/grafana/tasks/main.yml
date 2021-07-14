@@ -108,10 +108,18 @@
     - dashboards
     - plugins
 
-- name: grafana █ ensure password is set to the one in the role
+- name: grafana █ Ensure password is set to the one in the role variables
   command: "grafana-cli admin reset-admin-password {{ grafana_security.admin_password }}"
   changed_when: False
   no_log: true
+  register: grafana_cli_var
+
+- name: grafana █ Debug grafana-cli when  command is failing
+  debug:
+    msg: "grafana-cli failed to set password {{ grafana_cli_var.stderr }}"
+  when:
+    - grafana_cli_var is defined
+    - grafafa_cli_var.rc != 0
 
 - include_tasks: api_keys.yml
   when: grafana_api_keys | length > 0
