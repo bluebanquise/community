@@ -69,15 +69,15 @@
   tags:
     - plugins
 
-- name: "service █ Manage {{ grafana_services_to_start | join(' ') }} services state"
+- name: "service █ Restart services"
   service:
-    name: "{{ item }}"
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+    name: "{{ item  }}"
+    state: restarted
     daemon_reload: true
-  loop: "{{ grafana_services_to_start }}"
-  tags:
-    - service
+  with_items: "{{ grafana_services_to_start }}"
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
 
 - name: service █ Wait for grafana to start (http/s)
   wait_for:
@@ -122,6 +122,7 @@
     - grafana_cli_var is defined
     - grafana_cli_var.rc != 0
   failed_when: grafana_cli_var.rc != 0
+  ignore_errors: yes
 
 - include_tasks: api_keys.yml
   when: grafana_api_keys | length > 0

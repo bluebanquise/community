@@ -20,7 +20,7 @@
         - ansible_facts.os_family == "RedHat"
         - ansible_facts.services['firewalld'] is defined
 
-    - name: "Configure Grafana repository for EL7"
+    - name: "Configure Grafana repository for EL7/8"
       yum_repository:
         name: grafana
         description: Grafana repository
@@ -28,4 +28,4 @@
         gpgcheck: False
       when:
         - ansible_facts.os_family == "RedHat"
-        - ansible_facts.distribution_major_version == "7"
+        # - ansible_facts.distribution_major_version == "7"
