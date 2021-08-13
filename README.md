@@ -18,6 +18,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | display_tuning        | Provides screenrc configuration and iceberg shell colors | @oxedions       | [link](roles/display_tuning/)       |
 | generic_psf           | Generic packages, services, folders and files            | @johnnykeats    | [link](roles/generic_psf/)          |
 | grafana               | Install Grafana                                          | @oxedions       | [link](roles/grafana/)              |
+| haproxy               | Install and configure a basic http haproxy               | @oxedions       | [link](roles/haproxy/)              |
 | lmod                  | Install and configure Lmod                               | @oxedions       | [link](roles/lmod/)                 |
 | nhc                   | Install and configure LBNL Node Health Check             | @oxedions       | [link](roles/nhc/)                  |
 | ofed                  | Install OFED OpenFabrics                                 | @oxedions       | [link](roles/ofed/)                 |
@@ -28,8 +29,3 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | slurm                 | Install and configure Slurm Workload Manager             | @oxedions       | [link](roles/slurm/)                |
 | users_basic           | Set / remove users                                       | @oxedions       | [link](roles/users_basic/)          |
 
-## List of external useful roles/tools
-
-| Role/tool name        | Description                                              | Owner               | Link                                                    |
-| --------------------- | -------------------------------------------------------- | ------------------- | ------------------------------------------------------- |
-| System hardening      | Improve system security (os, apache, ssh, etc.)          | https://dev-sec.io/ | https://github.com/dev-sec/ansible-collection-hardening |
