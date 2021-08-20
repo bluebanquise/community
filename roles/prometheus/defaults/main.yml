@@ -16,6 +16,9 @@ prometheus_server_am_executor_host: localhost
 prometheus_server_ipmi_exporter_host: localhost
 prometheus_server_snmp_exporter_host: localhost
 
+prometheus_server_prometheus_user_gid: 909
+prometheus_server_prometheus_user_uid: 909
+
 prometheus_server_launch_parameters:
 
 prometheus_server_configuration_global:
@@ -54,8 +57,14 @@ prometheus_server_alertmanager_raw_configuration: |
       severity: 'warning'
     equal: ['alertname', 'cluster', 'service']
 
+prometheus_exporters_groups_to_scrape: []
+prometheus_exporters_to_scrape: []
+
 prometheus_ipmi_scrape: false
 prometheus_snmp_scrape: false
+
+prometheus_ipmi_scrape_equipment_profiles: []
+prometheus_snmp_scrape_equipment_profiles: []
 
 prometheus_server_snmp_exporter_with_generator: false
 prometheus_server_snmp_exporter_raw_configuration:

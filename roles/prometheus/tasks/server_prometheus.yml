@@ -1,4 +1,19 @@
 ---
+- name: group █ Add prometheus group
+  group:
+    name: prometheus
+    gid: "{{ prometheus_server_prometheus_user_gid }}"
+    state: present
+
+- name: user █ Add prometheus user
+  user:
+    name: prometheus
+    shell: /bin/false
+    uid: "{{ prometheus_server_prometheus_user_uid }}"
+    group: prometheus
+    home: /var/lib/prometheus
+    state: present
+
 - name: Package █ Install prometheus package
   package:
     name: prometheus

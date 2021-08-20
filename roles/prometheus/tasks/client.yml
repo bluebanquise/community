@@ -1,8 +1,15 @@
+---
+- name: set_fact ░ Gather exporters to install
+  set_fact:
+    exporters_groups: "{{ (exporters_groups | default([])) + item.value }}"
+  loop: "{{ prometheus_exporters_groups_to_scrape | dict2items}}"
+  when: inventory_hostname in groups[item.key]
+
 - name: package █ install exporters packages
   package:
     name: "{{ item.package }}"
     state: present
-  loop: "{{ prometheus_client_exporters }}"
+  loop: "{{ exporters_groups }}"
   when: item.package is defined and item.package is not none
 
 - name: "firewalld █ Open exporters ports into firewall's {{ prometheus_client_firewall_zone | default('public') }} zone"
@@ -12,7 +19,7 @@
     immediate: "yes"
     permanent: "yes"
     state: enabled
-  loop: "{{ prometheus_client_exporters }}"
+  loop: "{{ exporters_groups }}"
   when:
     - ansible_facts.os_family == "RedHat"
     - ep_firewall | default(false) | bool
@@ -25,5 +32,5 @@
     name: "{{ item.service }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ prometheus_client_exporters }}"
+  loop: "{{ exporters_groups }}"
   when: item.service is defined and item.service is not none

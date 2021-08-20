@@ -95,7 +95,7 @@ In the basic usage, the server role will install and setup the following tools:
 * Prometheus: scrap and store metrics, fire alerts.
 * Alertmanager: manage alerts fired by Prometheus.
 * Karma: dashboard to monitor alerts managed by Alertmanager.
-* Am-executor: trigger actions in case of alert fired.
+* Am-executor: trigger actions in case of alert fired. (**Am-executor is still not implemented**)
 * ipmi_exporter: translate ipmi data to http scrapable by Prometheus.
 * snmp_exporter: translate snmp data to http scrapable by Prometheus.
 
@@ -266,67 +266,71 @@ Playbook example:
         prometheus_client: true
 ```
 
-The client side of the role install and start local exporters on nodes.
-Its inventory data are also used by server side of the role to know what to
-scrap, on which group of nodes.
+The client side of the role simply install and start local exporters on nodes.
+
+## 5. Exporters
 
 Each exporter has its own http port. For example, node_exporter is available at
 http://localhost:9100 .
 
-In order for this role to install and start exporters on the target host, a
-configuration is required in the Ansible inventory: a file is needed for each
-**equipment_profile** group that should be monitored.
-(See main documentation of BlueBanquise CORE to know what is an
-equipment_profile.)
+Both server and client side of the role share the same variables for exporters.
 
-For example, to have equipment_typeL nodes installing and starting the
-node_exporter exporter, you will need to create file
-*inventory/group_vars/equipment_typeL/monitoring.yml* with the following content:
+Two main variables are available:
 
-```yaml
-prometheus_client_exporters:
-  - name: node_exporter
-    package: node_exporter
-    service: node_exporter
-    port: 9100
-```
+* `prometheus_exporters_to_scrape`
+* `prometheus_exporters_groups_to_scrape`
 
-For client part of the role, this means: all equipment_typeL nodes will install
-node_exporter package and start node_exporter service.
-For server part of the role, this means: all equipment_typeL nodes have to be
-scraped on port 9100.
-Again, client side variables are used by both client and server part of the role.
+Both variables are very similar.
 
-Another example: on your management nodes, you may wish to have more exporters
-setup to monitor more things. This would be here, assuming managements
-nodes are from equipment group equipment_typeM, a file
-*inventory/group_vars/equipment_typeM/monitoring.yml* with the following content:
+`prometheus_exporters_to_scrape` is used by server side only. Exporters listed
+here will be scraped by Prometheus using defined `address` and `port`.
+Exporters here have to be installed manually or with another role/task since
+client side of the role will not consider them.
 
 ```yaml
-prometheus_client_exporters:
-  - name: node_exporter
-    package: node_exporter
-    service: node_exporter
-    port: 9100
+prometheus_exporters_to_scrape:
+  - name: slurm_exporter
+    scrape_interval: 1m
+    scrape_timeout: 30s
+    address: 10.10.7.11
+    port: 9817
   - name: ha_cluster_exporter
-    package: ha_cluster_exporter
-    service: ha_cluster_exporter
+    scrape_interval: 1m
+    scrape_timeout: 30s
+    address: 10.10.7.11
     port: 9664
-  - name: prometheus_slurm_exporter
-    package: prometheus_slurm_exporter
-    service: prometheus_slurm_exporter
-    scrape_interval: 5m
-    scrape_timeout: 5m
-    port: 9101
 ```
 
-Note here that you can also set **scrape_interval** and **scrape_timeout**
-values for each exporter here. These will override default values only for this
-exporter.
+`prometheus_exporters_groups_to_scrape` is used by both server and client sides.
+Server side will scrap these exporters on all the nodes of the group, while
+client side will install them on all nodes of the group.
 
-Note also that ha_cluster_exporter is documented in the stack,
-but no packages are provided by the BlueBanquise project. Refer to the
-monitoring main documentation to get additional details about this exporter.
+Note that if port is not present, server side will ignore the exporter, but
+client side will install and start it. This can be used to install
+`prometheus_exporters_to_scrape` in HA context.
+
+```yaml
+prometheus_exporters_groups_to_scrape:
+  equipment_management:
+    - name: node_exporter
+      service: node_exporter
+      package: node_exporter
+      port: 9100
+  equipment_login:
+    - name: node_exporter
+      package: node_exporter
+      service: node_exporter
+      port: 9100
+    - name: login_exporter
+      package: login_exporter
+      service: login_exporter
+      scrape_interval: 1m
+      scrape_timeout: 30s
+      port: 9122
+```
+
+Note here that **scrape_interval** and **scrape_timeout** are optional
+values for each exporter here. These will override default values only if set.
 
 ## 5. IPMI and SNMP
 
@@ -345,26 +349,21 @@ prometheus_server_manage_ipmi: true
 prometheus_server_manage_snmp: false
 ```
 
-You then need to specify for each equipment_profile if you wish ipmi or/and snmp
-to be scraped. To do so, set the following values in the same monitoring.yml file
-described in the client section of the role above.
+You then need to specify which equipment_profile groups of nodes have to be
+ipmi scraped. To do so, simply set the `prometheus_ipmi_scrape_equipment_profiles`
+variable:
 
 ```yaml
-prometheus_ipmi_scrape: true
-prometheus_ipmi_scrape_interval: 5m
-prometheus_ipmi_scrape_timeout: 5m
-prometheus_snmp_scrape: false
-prometheus_snmp_scrape_interval:
-prometheus_snmp_scrape_timeout:
+prometheus_ipmi_scrape_equipment_profiles:
+  - name: equipment_management
+    scrape_interval: 5m
+    scrape_timeout: 2m
+  - name: equipment_login
+  - name: equipment_compute
 ```
 
-Since ipmi and snmp data are scraped using ipmi_exporter and snmp_exporter as
-"translators", the server part of the Prometheus role will take these
-variables into account to generate Prometheus, ipmi_exporter and/or snmp_exporter
-configuration files.
-
-If variables are not set, role will consider them to false. This avoid
-having to define them for each equipment_profile when not needed.
+This will add these into prometheus targets configuration for scraping via
+ipmi_exporter.
 
 Note that you can set custom scrape_interval and scrape_timeout for ipmi or snmp
 using dedicated variables shown in the example above.
