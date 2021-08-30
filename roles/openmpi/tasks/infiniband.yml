@@ -1,0 +1,12 @@
+- name: "package █ Install libverbs"
+  package:
+    name: libibverbs-devel
+    state: present
+  tags:
+    - package
+
+- name: Allow openmpi to work with Infiniband
+  ansible.builtin.lineinfile:
+    path: ~/.bashrc
+    line: "export OMPI_MCA_btl_openib_allow_ib=1"
+    create: yes

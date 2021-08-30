@@ -1,0 +1,8 @@
+---
+slurm_packages_to_install:
+  server:
+  - openmpi
+  - openmpi-devel
+
+  client:
+  - openmpi

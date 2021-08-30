@@ -1,0 +1,31 @@
+---
+- name: include_vars ░ Gather OS specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: "package █ Install {{ openmpi_packages_to_install[openmpi_profile] | join(' ') }}"
+  package:
+    name: "{{ openmpi_packages_to_install[openmpi_profile] }}"
+    state: present
+  tags:
+    - package
+
+- name: service █ Manage openmpi service state
+  service:
+    name: openmpi
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  tags:
+    - service
+
+- name: include_tasks ░ Configure openmpi with Infiniband
+  include_tasks: "infiniband.yml"
+  when:  openmpi_profile == "server" and install_infiniband == 'True'
