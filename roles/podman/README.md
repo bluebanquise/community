@@ -25,7 +25,6 @@ Variables for this role:
 | podman_configure_local_registry | False | boolean | starts a default local registry when True |
 | podman_configure_ha | False | boolean | configure podman for a HA cluster |
 | podman_users | { root: '100000:65535' } | dictionary | podman users that get uid mapping configured |
-| podman_users | { root: '100000:65535' } | dictionary | podman users that get uid mapping configured |
 | podman_manual_mapping | True | boolean | ansible managed /etc/subuid and /etc/subgid entries |
 | podman_search_registries | - 'docker.io' | items | list of registries that podman is pulling images from |
 | podman_insecure_registries | [] | items | non TLS registries for podman, i.e. localhost:5000 |
