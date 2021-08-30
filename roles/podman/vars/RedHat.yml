@@ -1,0 +1,7 @@
+---
+podman_packages_to_install:
+  - podman
+podman_services_to_start:
+  - podman
+podman_firewall_services_to_add:
+  - podman

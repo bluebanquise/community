@@ -1,0 +1,30 @@
+---
+- name: Set os_family dependent variables
+  include_vars: '{{ ansible_os_family }}.yml'
+
+- name: Set distribution dependent variables
+  include_vars: '{{ vars_file }}'
+  with_first_found:
+    - files:
+        - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'
+        - '{{ ansible_distribution }}.yml'
+        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'
+      skip: True
+  loop_control:
+    loop_var: vars_file
+
+- name: Include tasks for installing podman
+  include_tasks: setup.yml
+
+- name: Include tasks for /etc/containers configuration
+  include_tasks: conf.yml
+  when: podman_configure | bool
+
+- name: Include tasks for subuid/subgid mappings and user config
+  include_tasks: users.yml
+  when: podman_configure | bool
+  notify: "restart podman"
+
+- name: Include tasks for local registry
+  include_tasks: registry.yml
+  when: podman_configure_local_registry | bool
