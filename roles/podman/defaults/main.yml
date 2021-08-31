@@ -22,7 +22,8 @@ podman_blocked_registries: []
 podman_local_registry_dir: "/var/lib/registry"
 podman_local_registry_port: 5000
 podman_registry_container_path: "/var/www/html/images/registry-2.tgz"
-podman_registry_container: "registry:2"
+podman_registry_container: "registry"
+podman_registry_container_tag: "2"
 
 ####################
 # libpod section
