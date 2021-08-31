@@ -3,7 +3,7 @@
 # set to True to enable the configuration task
 podman_configure: True
 # If 'True' it will deploy a local registry
-podman_configure_local_registry: True
+podman_configure_local_registry: False
 # Not used yet ... reserved for future Active/Active HA setup
 podman_configure_ha: False
 
@@ -19,7 +19,7 @@ podman_blocked_registries: []
 # Name of the default registry
 podman_local_registry_dir: "/var/lib/registry"
 podman_local_registry_port: 5000
-podman_registry_container_path: "/var/www/html/images/registry-v2.tgz"
+podman_registry_container_path: "/var/www/html/images/registry-2.tgz"
 
 ####################
 # libpod section

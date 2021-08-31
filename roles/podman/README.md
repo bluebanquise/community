@@ -31,7 +31,7 @@ Variables for this role:
 | podman_blocked_registries | [] | items | blocked container registries |
 | podman_local_registry_dir | "/var/lib/registry" | String | default local registry path when enabled |
 | podman_local_registry_port | 5000 | integer | port of the local registry when enabled |
-| podman_registry_container_path | /var/www/html/images/registry-v2.tgz | String | path of the container used to spawn to default local registry when enabled |
+| podman_registry_container_path | /var/www/html/images/registry-2.tgz | String | path of the container used to spawn to default local registry when enabled |
 | podman_conf_cgroup_manager | 'systemd' | string | /etc/container/libpod.conf: cgroup_manager |
 | podman_conf_events_logger | 'file' | string | /etc/container/libpod.conf: events_logger, due to podman error with journald, see [issue](https://github.com/containers/libpod/issues/3126) |
 | podman_conf_namespace | '' | string | /etc/container/libpod.conf: namespace (=default namespace) |
@@ -61,6 +61,16 @@ For a basic setup with default values run:
       - 'localhost:5000'
   roles:
     - role: podman
+```
+
+## Local registry
+
+In order to deploy the optionnal local registry, you must provide the container for it. This is done wih the following steps:
+
+```shell
+docker pull registry:2
+docker save registry:2 | gzip > registry-2.tgz
+scp registry-2 root@<management1>:/var/www/html/images/registry-2.tgz
 ```
 
 ## License and Author
