@@ -14,13 +14,14 @@
 
 - name: registry █ Load local registry container
   command: "podman load -i {{ podman_registry_container_path }}"
-  changed_when: False
+  changed_when: false
 
 - name: registry █ Find out if registry is already deployed
   command: "podman container exists {{ podman_registry_container }}"
   register: cmdout
-  changed_when: False
+  changed_when: false
 
 - name: registry █ Run local registry
   command: "podman run --privileged -d --name registry -p 5000:{{ podman_local_registry_port }} -v /var/lib/registry:{{ podman_local_registry_dir }} --restart=always {{ podman_registry_container }}:{{ podman_registry_container_tag }}"
+  # yamllint disable-line rule:line-length
   when: cmdout.rc != 0

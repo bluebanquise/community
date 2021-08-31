@@ -7,9 +7,10 @@
   with_first_found:
     - files:
         - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'
+        # yamllint disable-line rule:line-length
         - '{{ ansible_distribution }}.yml'
         - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'
-      skip: True
+      skip: true
   loop_control:
     loop_var: vars_file
 

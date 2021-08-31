@@ -1,11 +1,11 @@
 ---
 # use default config by default
 # set to True to enable the configuration task
-podman_configure: True
+podman_configure: true
 # If 'True' it will deploy a local registry
-podman_configure_local_registry: False
+podman_configure_local_registry: false
 # Not used yet ... reserved for future Active/Active HA setup
-podman_configure_ha: False
+podman_configure_ha: false
 
 ####################
 # registries section
