@@ -5,7 +5,7 @@ driver:
   name: docker
 lint: |
   set -e
-  yamllint -d "{extends: default, rules: {line-length: disable, indentation: {spaces: 1}}}" .
+  yamllint -d "{extends: default, rules: {line-length: disable, indentation: disable}}" .
 platforms:
   - name: instance
     image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
