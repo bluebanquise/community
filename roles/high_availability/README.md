@@ -1,6 +1,6 @@
 # High Availability
 
-## Description
+## 1. Description
 
 This role deploy and Active-Passive HA cluster based on PCS (corosync-pacemaker).
 
@@ -9,18 +9,46 @@ desired resources and constraint.
 
 This role can be combined with DBRD role to obtain shared storage across nodes.
 
-## Instructions
+The target cluster is an `1+N` ha nodes. The example here is based on a cluster
+of 3 ha servers working together.
+
+```
+  ┌────────────────┐          ┌─────────────────┐          ┌─────────────────┐
+  │      ha1       │          │       ha2       │          │       ha3       │
+  │                │          │                 │          │                 │
+  │                │          │                 │          │                 │
+  │                │          │                 │          │                 │
+  │                │          │                 │          │                 │
+  │                │          │                 │          │                 │
+  └────────────┬───┘          └────────┬────────┘          └────┬────────────┘
+               │                       │                        │
+               │                       │                        │
+               └───────────────────────┴────────────────────────┘
+                                    Network
+```
+
+## 2. Instructions to configure and deploy
 
 Ensure your nodes are able to install HA components (may require a special
   subscription on RHEL OS).
 
 ### HA cluster
 
-Create a group that contains only your HA cluster nodes, for example
-`ha_cluster`, then in `inventory/group_vars/hacluster` folder, create a file
-with the following variables, tuned to your needs:
+Create a group called `ha_cluster` that contains only your HA cluster nodes.
+To do so, create file `inventory/cluster/groups/ha_cluster` with the following
+content:
 
 ```
+[ha_cluster]
+ha1
+ha2
+ha3
+```
+
+Then in `inventory/group_vars/ha_cluster` folder, create a file
+`ha_parameters.yml` with the following variables, tuned to your needs:
+
+```yaml
 high_availability_cluster_nodes:
   - name: ha1             # Hostname of the HA cluster nodes
     addrs:                # List of addresses to be used for HA ring (allow multiple rings for redundancy)
@@ -28,9 +56,73 @@ high_availability_cluster_nodes:
   - name: ha2
     addrs:
       - ha2
+  - name: ha3
+    addrs:
+      - ha3
 ```
 
-And deploy the HA cluster with these parameters.
+You can add multiple `addrs` instead of one, to allow multiple networks (rings)
+to secure HA cluster in case one network fail:
+
+```
+ ┌────────────────┐          ┌─────────────────┐          ┌─────────────────┐
+ │      ha1       │          │       ha2       │          │       ha3       │
+ │                │          │                 │          │                 │
+ │                │          │                 │          │                 │
+ │                │          │                 │          │                 │
+ │                │          │                 │          │                 │
+ │                │          │                 │          │                 │
+ └───────┬────┬───┘          └────────┬─────┬──┘          └────┬────┬───────┘
+         │    │                       │     │                  │    │
+         │    │                       │     │                  │    │
+         │    └───────────────────────┴─────┼──────────────────┘    │
+         │                         Network  │                       │
+         │                                  │                       │
+         └──────────────────────────────────┴───────────────────────┘
+                                      2nd Network
+```
+
+So for example here:
+
+```yaml
+high_availability_cluster_nodes:
+  - name: ha1             # Hostname of the HA cluster nodes
+    addrs:                # List of addresses to be used for HA ring (allow multiple rings for redundancy)
+      - ha1
+      - ha1-2nd-network
+  - name: ha2
+    addrs:
+      - ha2
+      - ha2-2nd-network
+  - name: ha3
+    addrs:
+      - ha3
+      - ha3-2nd-network
+```
+
+You now need to select a reference node in this pool. This node will be the one
+that initiate HA cluster, register the other nodes in it, and populate resources.
+These actions can only be done by one member of the pool at a time.
+Note that once the cluster is created, the reference node can be any one from
+the pool that is already registered in the HA cluster.
+
+To set reference node, you need to use variable `high_availability_reference_node`.
+You can set the reference node in the `ha_parameters.yml`, and on need, use
+`--extra-vars` at `ansible-playbook` invocation to use another one:
+
+```yaml
+high_availability_reference_node: ha1
+```
+
+Fianly, before deploying HA cluster, update
+`high_availability_ha_cluster_password`variable with a new SHA512 password hash
+(do not use default one for production).
+
+```yaml
+high_availability_ha_cluster_password: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0
+```
+
+Now deploy the HA cluster with these parameters.
 
 Check cluster status after role deployment using:
 
@@ -51,9 +143,10 @@ Three kind of properties are supported currently by this role:
 * psc resource op defaults
 * pcs resource defaults
 
-For each, it is possible to define a list of properties with their value:
+For each, it is possible to define a list of properties with their value. For
+example:
 
-```
+```yaml
 high_availability_pcs_property:
   - name: cluster-recheck-interval
     value: 250
@@ -69,7 +162,15 @@ high_availability_pcs_resource_defaults:
     value: 40
 ```
 
+You can also skip this part and do not set any properties, to keep distribution
+default values.
+
 ### Resources
+
+A resource is an event (a service running, a partition mounted, a virtual ip
+  created, etc.) shared between nodes. These resources can be instructed to
+run on a single node of the pool at a time, or to be running as clones on
+multiple nodes at the same time.
 
 Resources are to be defined under variable `high_availability_resources`.
 The role manage resources using groups, which acts as colocation constraint
@@ -80,7 +181,7 @@ constraint (if the first resource in the list fail to start, the second one
 
 For example:
 
-```
+```yaml
 high_availability_resources:
   - group: http
     resources:
@@ -99,11 +200,27 @@ high_availability_resources:
 ```
 
 In this example, resource `vip-http` and `service-http` belongs to the same
-group `http`, and so will be running on the same host.
+group `http`, and so will be running on the same host at the same time.
 Also, since `vip-http` is listed before `service-http`, if `vip-http` fail to
 start, then `service-http` will not start.
 
-A list of resources for BlueBanquise CORE is provided at the end of this README.
+```
+  ┌────────────────┐          ┌─────────────────┐          ┌─────────────────┐
+  │      ha1       │          │       ha2       │          │       ha3       │
+  │                │          │                 │          │                 │
+  │                │          │                 │          │                 │
+  │                │          │                 │          │                 │
+  │                │          │                 │          │                 │
+  │                │          │  httpd          │          │  named          │
+  └────────────┬───┘          └────────┬────────┘          └────┬────────────┘
+               │             10.10.0.7 │              10.10.0.8 │
+               │                       │                        │
+               └───────────────────────┴────────────────────────┘
+                                    Network
+```
+
+A list of resources examples for BlueBanquise CORE is provided at the end of
+this README.
 
 ### Constraint
 
@@ -119,9 +236,9 @@ The very common usage is to define collocation constraint that prevent some
 group to be running on the same host than another.
 
 For example, to set that `dns` group should never be running on the same host
-than `http` group:
+than `http` group, add a colocation constraint on dns group this way:
 
-```
+```yaml
 high_availability_resources:
   - group: http
     resources:
@@ -149,7 +266,7 @@ useful to ensure a good load balancing between the ha cluster nodes.
 
 For example, to set that `http` groups should be running on ha 2 node:
 
-```
+```yaml
 high_availability_resources:
   - group: http
     resources:
@@ -164,6 +281,8 @@ high_availability_resources:
           - ha2
 ```
 
+Type can be `prefers` and `avoids`.
+
 ### Stonith
 
 Stonith (for "Shoot The Other Node In The Head") allows to prevent issues when a
@@ -172,7 +291,7 @@ node of the cluster is not working as expected or is unsynchronized with others.
 It is possible to define stonith resources using this role. For example, to
 define an IPMI stonith, use:
 
-```
+```yaml
 high_availability_stonith:
   - name: fenceha1
     type: fence_ipmilan                                                # IPMI fencing
@@ -203,7 +322,7 @@ exported through nfs, and mounted over nfs by all other HA cluster nodes.
 So at the end, you need for this part 2 available FS shared between nodes, here
 `/dev/repositories` and `/dev/pxe`, and a vip, here `10.10.77.1`.
 
-```
+```yaml
 - group: http
   resources:
     - id: fs-repositories
@@ -251,7 +370,7 @@ Where all nodes mount the nfs volume except one.
 DHCP server do not need a virtual ip, expect for very specific cases.
 Resource is simple to declare as only dhcp service is needed.
 
-```
+```yaml
 - group: dhcp
   resources:
     - id: service-dhcp
@@ -262,7 +381,7 @@ Resource is simple to declare as only dhcp service is needed.
 
 DNS server need a virtual ip, and the dns service.
 
-```
+```yaml
 - group: dns
   resources:
     - id: vip-dns
@@ -278,13 +397,13 @@ Time server is a bit tricky.
 Chrony daemon is running on both clients and servers, and is using the same
 configuration file path.
 
-To solve this, execute time role 2 times, but with different configuration
+To solve this, execute `time` role 2 times, but with different configuration
 path and client/server setting. Switch is then made using a simple
-ocf_heartbeat_symlink resource and collocation constraint.
+`ocf_heartbeat_symlink` resource and collocation constraint.
 
 In the playbook, use:
 
-```
+```yaml
 roles:
   - role: time
     tags: time
@@ -306,7 +425,7 @@ tasks:
 This will generate both configurations, and ensure the default configuration is
 not present. Then in HA resources, declare the following:
 
-```
+```yaml
 - group: time-server
   resources:
     - id: vip-time-server
@@ -337,7 +456,7 @@ one for client.
 
 In the playbook, use:
 
-```
+```yaml
 roles:
   - role: log_server
     tags: log
@@ -357,7 +476,7 @@ tasks:
 This will generate both configurations, and ensure the default configuration is
 not present. Then in HA resources, declare the following:
 
-```
+```yaml
 - group: log-server
   resources:
     - id: fs-log-server
