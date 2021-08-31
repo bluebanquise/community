@@ -5,6 +5,9 @@ driver:
   name: docker
 lint: |
   set -e
+  options:
+    config-data:
+      line-length: disable
   yamllint .
 platforms:
   - name: instance
