@@ -24,6 +24,8 @@ podman_local_registry_port: 5000
 podman_registry_container_path: "/var/www/html/images/registry-2.tgz"
 podman_registry_container: "registry"
 podman_registry_container_tag: "2"
+podman_local_registry_owner: "root"
+podman_local_registry_group: "root"
 
 ####################
 # libpod section
