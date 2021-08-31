@@ -13,6 +13,8 @@ podman_configure_ha: False
 podman_search_registries:
  - 'docker.io'
 # insecure registries (no TLS) that podman is searching for container images
+# if running the local registry, you have to add it to this list
+# podman_insecure_registries: ['localhost:5000']
 podman_insecure_registries: []
 # blocked registries for podman
 podman_blocked_registries: []
