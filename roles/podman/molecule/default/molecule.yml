@@ -5,10 +5,7 @@ driver:
   name: docker
 lint: |
   set -e
-  options:
-    config-data:
-      line-length: disable
-  yamllint .
+  yamllint -d "{extends: default, rules: {line-length: disable}}" .
 platforms:
   - name: instance
     image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
