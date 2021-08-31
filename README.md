@@ -17,12 +17,13 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | clone                 | Clone to image and restore HDD                           | @johnnykeats    | [link](roles/clone/)                |
 | display_tuning        | Provides screenrc configuration and iceberg shell colors | @oxedions       | [link](roles/display_tuning/)       |
 | generic_psf           | Generic packages, services, folders and files            | @johnnykeats    | [link](roles/generic_psf/)          |
-| grafana               | Install Grafana                                          | @oxedions       | [link](roles/grafana/)              |
+| grafana               | Install Grafana                                          | @strus38        | [link](roles/grafana/)              |
 | lmod                  | Install and configure Lmod                               | @oxedions       | [link](roles/lmod/)                 |
 | nhc                   | Install and configure LBNL Node Health Check             | @oxedions       | [link](roles/nhc/)                  |
 | ofed                  | Install OFED OpenFabrics                                 | @oxedions       | [link](roles/ofed/)                 |
 | openldap              | Install and configure OpenLDAP and SSSD (beta)           | @oxedions       | [link](roles/openldap/)             |
 | prometheus            | Install and configure Prometheus monitoring and alerting | @oxedions       | [link](roles/prometheus/)           |
+| podman                | Install and configure Podman                             | @strus38        | [link](roles/prometheus/) 
 | report                | Check inventory and gather helpful data                  | @oxedions       | [link](roles/report/)               |
 | singularity           | Install and configure Singularity or SingularityPRO      | @strus38        | [link](roles/singularity/)          |
 | slurm                 | Install and configure Slurm Workload Manager             | @oxedions       | [link](roles/slurm/)                |
