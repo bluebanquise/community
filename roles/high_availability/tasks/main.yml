@@ -53,9 +53,10 @@
 
     - name: command █ Register reference node
       command: "pcs cluster setup ha_cluster {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %}"
+      loop: "{{high_availability_cluster_nodes}}"
       when:
         - (corosync_known_hosts.stdout_lines | select("match", ".*"+high_availability_reference_node+".*") | list | length) < 1
-        - item == "{{ high_availability_reference_node }}"
+        - item.name == "{{ high_availability_reference_node }}"
 
     - name: command █ Check nodes already in corosync
       command: "cat /etc/corosync/corosync.conf"
@@ -68,7 +69,7 @@
       loop: "{{high_availability_cluster_nodes}}"
       when:
         - (corosync_known_hosts.stdout_lines | select("match", ".*name:\\s"+item.name+".*") | list | length) < 1
-        - item != "{{ high_availability_reference_node }}"
+        - item.name != "{{ high_availability_reference_node }}"
 
 - name: service █ Enable and start cluster
   service:
