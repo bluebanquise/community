@@ -10,6 +10,7 @@ This role is compatible with HA clusters:
 
 * RedHat 8
 * CentOS 8
+* Ubuntu 18.04 & 20.04
 
 ## Requirements
 
