@@ -5,6 +5,9 @@
 This role deploy a basic DRBD cluster to share storage between multiple nodes.
 Main target is to be combined with high availability role.
 
+Note: This role is for now considered experimental and should be used with 
+care in production environment.
+
 ## Instructions
 
 To allow role to find needed packages, you need to add elrepo repositories on 
