@@ -36,13 +36,13 @@
   tags:
     - template
 
-- name: meta █ Run handler tasks to restart dhcp services
+- name: meta █ Run handler tasks to restart services
   meta: flush_handlers
 
 - name: service █ Manage httpd service
   service:
     name: httpd
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+    enabled: yes
+    state: started
   tags:
     - service
