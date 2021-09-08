@@ -9,7 +9,8 @@
     - pacemaker
     - corosync
     - pcs
-
+    - fence-agents-all
+    
 - name: group █ Create cluster system group
   group:
     name: haclient
