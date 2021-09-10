@@ -25,7 +25,7 @@ Variables for this role:
 | podman_configure | True | boolean | use default configuration when False, write config, when True |
 | podman_configure_local_registry | False | boolean | starts a default local registry when True |
 | podman_configure_ha | False | boolean | configure podman for a HA cluster |
-| podman_users | { root: '100000:65535' } | dictionary | podman users that get uid mapping configured |
+| podman_users | { root: '100000:65535' } | dictionary | podman users that get uid mapping configured, those users MUST exist on the system before running this role |
 | podman_manual_mapping | True | boolean | ansible managed /etc/subuid and /etc/subgid entries |
 | podman_search_registries | - 'docker.io' | items | list of registries that podman is pulling images from |
 | podman_insecure_registries | [] | items | non TLS registries for podman, i.e. localhost:5000 |
@@ -54,24 +54,57 @@ For a basic setup with default values run:
     podman_configure_local_registry: True
     podman_users:
       root: '100000:65535'
-      myuser1: '165536:65535'
+      guest: '1000:1000'
       ...
-    podman_registries:
-      - 'registry.access.redhat.com'
-      - 'docker.io'
+    podman_insecure_registries:
       - 'localhost:5000'
+    podman_search_registries:
+      - 'registry.access.redhat.com'
   roles:
     - role: podman
 ```
 
 ## Local registry
 
-In order to deploy the optionnal local registry, you must provide the container for it. This is done wih the following steps:
+In order to deploy the optionnal local registry, you must provide the container for it. 
+This is done wih the following steps from your local PC or from a server with Internet access:
+
+* Using Docker
 
 ```shell
 docker pull registry:2
 docker save registry:2 | gzip > registry-2.tgz
 scp registry-2 root@<management1>:/var/www/html/images/registry-2.tgz
+```
+
+* Using podman
+
+```shell
+podman pull registry:2
+podman save registry:2 | gzip > registry-2.tgz
+scp registry-2 root@<management1>:/var/www/html/images/registry-2.tgz
+```
+
+To deploy the local registry, you must customize the following variables when calling the role:
+
+```yaml
+podman_configure_local_registry: true
+
+####################
+# registries section
+####################
+podman_search_registries:
+  - 'localhost:5000'
+  - 'docker.io'
+podman_insecure_registries:
+  - 'localhost:5000'
+podman_local_registry_dir: "/var/lib/registry"
+podman_local_registry_port: 5000
+podman_registry_container_path: "/var/www/html/images/registry-2.tgz"
+podman_registry_container: "registry"
+podman_registry_container_tag: "2"
+podman_local_registry_owner: "root"
+podman_local_registry_group: "root"
 ```
 
 ## License and Author
