@@ -16,6 +16,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | --------------------- | -------------------------------------------------------- | --------------- | ----------------------------------- |
 | clone                 | Clone to image and restore HDD                           | @johnnykeats    | [link](roles/clone/)                |
 | display_tuning        | Provides screenrc configuration and iceberg shell colors | @oxedions       | [link](roles/display_tuning/)       |
+| drbd                  | Setup drbd disk replication on multiple nodes            | @oxedions       | [link](roles/drbd/)                 |
 | generic_psf           | Generic packages, services, folders and files            | @johnnykeats    | [link](roles/generic_psf/)          |
 | grafana               | Install Grafana                                          | @strus38        | [link](roles/grafana/)              |
 | lmod                  | Install and configure Lmod                               | @oxedions       | [link](roles/lmod/)                 |
@@ -27,6 +28,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | report                | Check inventory and gather helpful data                  | @oxedions       | [link](roles/report/)               |
 | singularity           | Install and configure Singularity or SingularityPRO      | @strus38        | [link](roles/singularity/)          |
 | slurm                 | Install and configure Slurm Workload Manager             | @oxedions       | [link](roles/slurm/)                |
+| update_reboot         | Update all packages and reboot system                    | @oxedions       | [link](roles/update_reboot/)        |
 | users_basic           | Set / remove users                                       | @oxedions       | [link](roles/users_basic/)          |
 
 ## List of external useful roles/tools

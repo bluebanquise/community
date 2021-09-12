@@ -6,6 +6,7 @@
 
   - clone. Owner: @oxedions
   - display_tuning. Owner: @oxedions
+  - drbd. Owner: @oxedions
   - generic_psf. Owner: @johnnykeats
   - grafana. Owner: @oxedions
   - lmod. Owner: @oxedions
@@ -16,6 +17,7 @@
   - report. Owner: @oxedions
   - singularity. Owner: @strus38
   - slurm. Owner: @oxedions
+  - update_reboot: Owner: @oxedions
   - users_basic. Owner: @oxedions
 
 ### Updated roles
