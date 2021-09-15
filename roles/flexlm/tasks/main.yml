@@ -74,7 +74,7 @@
 
 - name: flexlm █ Create lic_path if needed
   file:
-    path: "{{ item.lic_path }}"
+    path: "{{ item.lic_path | basename }}"
     state: directory
     mode: '0755'
   with_flattened:
