@@ -28,8 +28,9 @@
 - name: flexlm █ Create flexlm user
   user:
     name: '{{ flexlm_user_name }}'
-    createhome: False
-    system: True
+    createhome: false
+    system: true
+  when: flexlm_manual_mapping|bool
   tags:
     - configure
 
@@ -99,7 +100,7 @@
   with_flattened:
     - '{{ flexlm_licences }}'
   when: ( (flexlm_deploy_state == "present") and
-        ( item.service | d(True) ))
+        ( item.service | d(true) ))
   notify: ['systemd daemon reload', 'restart flexlm services']
   tags:
     - service
@@ -107,8 +108,8 @@
 - name: flexlm █ Manage flexlm services
   service:
     name: '{{ "flexlm-" + item.name }}'
-    state: '{{ "started" if (flexlm_deploy_state == "present" and (item.service | d(True) | bool)) else "stopped" }}'
-    enabled: '{{ item.service | d(True) | bool }}'
+    state: '{{ "started" if (flexlm_deploy_state == "present" and (item.service | d(true) | bool)) else "stopped" }}'
+    enabled: '{{ item.service | d(true) | bool }}'
   with_flattened:
     - '{{ flexlm_licences }}'
   tags:
