@@ -72,6 +72,19 @@
   tags:
     - configure
 
+- name: flexlm █ Create lic_path if needed
+  file:
+    path: "{{ item.lic_path }}"
+    state: directory
+    mode: '0755'
+  with_flattened:
+    - '{{ flexlm_licences }}'
+  when: 
+    - (item.lic_src|d())
+    - item.lic_path
+  tags:
+    - configure
+
 - name: flexlm █ Add licence file
   copy:
     src: '{{ item.lic_src }}'
@@ -82,7 +95,7 @@
   with_flattened:
     - '{{ flexlm_licences }}'
   when: 
-    - item.lic_src
+    - (item.lic_src|d())
     - item.lic_path
   notify: ['restart flexlm services']
   tags:
