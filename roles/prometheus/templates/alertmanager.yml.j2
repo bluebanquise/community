@@ -1,4 +1,23 @@
+#jinja2: lstrip_blocks: "True"
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
-{{ prometheus_server_alertmanager_raw_configuration }}
+{% macro yamlexpand(dict,ident) %}
+  {% for key, value in dict.items() %}
+    {% if value is mapping %}{# This is a dict, go deeper #}
+{% for space in range(ident) %} {% endfor %}{{key}}:
+{{yamlexpand(value,ident+2)}}
+    {% else %}
+      {% if value is iterable %}{# This is a list #}
+{% for space in range(ident) %} {% endfor %}{{key}}:
+        {% for item in value %}
+{% for space in range(ident+2) %} {% endfor %}- {{item}}
+        {% endfor %}
+      {% else %}
+{% for space in range(ident) %} {% endfor %}{{ key }}: {{ value }}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endmacro %}
+
+{{ yamlexpand(prometheus_server_alertmanager_raw_configuration,0) }}

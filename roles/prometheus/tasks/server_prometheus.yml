@@ -14,10 +14,21 @@
     home: /var/lib/prometheus
     state: present
 
-- name: Package █ Install prometheus package
+- name: package █ Install prometheus package
   package:
     name: prometheus
     state: present
+
+- name: template █ Generate prometheus service file
+  template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+    owner: root
+    group: root
+    mode: 0755
+  notify: systemd █ Reload systemd configuration
+  tags:
+    - template
 
 - name: "firewalld █ Add prometheus service to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
   firewalld:
@@ -91,18 +102,6 @@
     group: root
     mode: 0755
   when: prometheus_server_launch_parameters is defined and prometheus_server_launch_parameters is not none
-
-- name: template █ Generate custom launch parameters for Prometheus
-  template:
-    src: custom_launch_parameters.conf.j2
-    dest: /etc/systemd/system/prometheus.service.d/custom_launch_parameters.conf
-    owner: root
-    group: root
-    mode: 0644
-  notify: systemd █ Reload systemd configuration
-  when: prometheus_server_launch_parameters is defined and prometheus_server_launch_parameters is not none
-  tags:
-    - template
 
 - meta: flush_handlers
 

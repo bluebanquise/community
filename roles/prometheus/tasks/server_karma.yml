@@ -4,6 +4,17 @@
     name: karma
     state: present
 
+- name: template █ Generate karma service file
+  template:
+    src: karma.service.j2
+    dest: /etc/systemd/system/karma.service
+    owner: root
+    group: root
+    mode: 0755
+  notify: systemd █ Reload systemd configuration
+  tags:
+    - template
+
 - name: file █ Create karma directories structure
   file:
    path: "{{ item }}"

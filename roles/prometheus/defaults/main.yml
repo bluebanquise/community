@@ -19,7 +19,23 @@ prometheus_server_snmp_exporter_host: localhost
 prometheus_server_prometheus_user_gid: 909
 prometheus_server_prometheus_user_uid: 909
 
-prometheus_server_launch_parameters:
+prometheus_server_launch_parameters: |
+  --config.file /etc/prometheus/prometheus.yml \
+  --storage.tsdb.path /var/lib/prometheus/ \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS
+
+alertmanager_launch_parameters: |
+  --config.file=/etc/alertmanager/alertmanager.yml
+
+karma_launch_parameters: |
+  --config.file=/etc/karma/karma.yml
+
+ipmi_exporter_launch_parameters: |
+  --config.file=/etc/ipmi_exporter/ipmi_config.yml
+
+snmp_exporter_launch_parameters: |
+  --config.file=/etc/snmp_exporter/snmp.yml
 
 prometheus_server_configuration_global:
   scrape_interval: 1m
@@ -32,24 +48,21 @@ prometheus_server_prometheus_raw_configuration:
 prometheus_server_additional_alerts:
 prometheus_server_custom_alerts:
 
-prometheus_server_alertmanager_raw_configuration: |
+prometheus_server_alertmanager_raw_configuration:
   global:
     smtp_smarthost: 'localhost:25'
     smtp_from: 'alertmanager@your_domain'
     smtp_require_tls: false
-
   route:
     group_by: ['alertname', 'job']
     group_wait: 1m
     group_interval: 10m
     repeat_interval: 3h
     receiver: sys-admin-team
-
   receivers:
     - name: 'sys-admin-team'
       email_configs:
         - to: 'sys-admin-team@site.com'
-
   inhibit_rules:
   - source_match:
       severity: 'critical'

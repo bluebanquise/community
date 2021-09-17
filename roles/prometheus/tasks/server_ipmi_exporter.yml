@@ -7,6 +7,17 @@
     - ipmi_exporter
     - freeipmi
 
+- name: template █ Generate ipmi_exporter service file
+  template:
+    src: ipmi_exporter.service.j2
+    dest: /etc/systemd/system/ipmi_exporter.service
+    owner: root
+    group: root
+    mode: 0755
+  notify: systemd █ Reload systemd configuration
+  tags:
+    - template
+
 - name: file █ Create ipmi_exporter directories structure
   file:
    path: "{{ item }}"
