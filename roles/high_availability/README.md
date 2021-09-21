@@ -1,5 +1,24 @@
 # High Availability
 
+- [High Availability](#high-availability)
+  * [1. Description](#1-description)
+  * [2. Instructions to configure](#2-instructions-to-configure)
+    + [2.1. HA cluster](#21-ha-cluster)
+    + [2.2. Properties](#22-properties)
+    + [2.3. Resources](#23-resources)
+    + [2.4. Constraint](#24-constraint)
+      - [2.4.1. Collocation constraint](#241-collocation-constraint)
+      - [2.4.2. Location constraint](#242-location-constraint)
+    + [2.5. Stonith](#25-stonith)
+  * [3. Deploy HA](#3-deploy-ha)
+  * [4. List of standard resources](#4-list-of-standard-resources)
+    + [4.1. Repositories and PXE](#41-repositories-and-pxe)
+    + [4.2. DHCP server](#42-dhcp-server)
+    + [4.3. DNS server](#43-dns-server)
+    + [4.4. Time server](#44-time-server)
+    + [4.5. Log server](#45-log-server)
+  * [5. Changelog](#5-changelog)
+
 ## 1. Description
 
 This role deploy and Active-Passive HA cluster based on PCS (corosync-pacemaker).
@@ -27,12 +46,12 @@ of 3 ha servers working together.
                                     Network
 ```
 
-## 2. Instructions to configure and deploy
+## 2. Instructions to configure
 
 Ensure your nodes are able to install HA components (may require a special
-  subscription on RHEL OS).
+ subscription on RHEL OS).
 
-### HA cluster
+### 2.1. HA cluster
 
 Create a group called `ha_cluster` that contains only your HA cluster nodes.
 To do so, create file `inventory/cluster/groups/ha_cluster` with the following
@@ -135,7 +154,7 @@ All nodes should be online.
 If all goes well, it is then possible to add properties, resources,
 constraints and stonith.
 
-### Properties
+### 2.2. Properties
 
 Three kind of properties are supported currently by this role:
 
@@ -165,7 +184,7 @@ high_availability_pcs_resource_defaults:
 You can also skip this part and do not set any properties, to keep distribution
 default values.
 
-### Resources
+### 2.3. Resources
 
 A resource is an event (a service running, a partition mounted, a virtual ip
   created, etc.) shared between nodes. These resources can be instructed to
@@ -222,14 +241,14 @@ start, then `service-http` will not start.
 A list of resources examples for BlueBanquise CORE is provided at the end of
 this README.
 
-### Constraint
+### 2.4. Constraint
 
 Now that cluster is running resources, it is possible to add specific constraint
 on groups (on top of groups and start order constraint already in place).
 
 Two kind of constraints are available with this role: collocation and location.
 
-#### Collocation constraint
+#### 2.4.1. Collocation constraint
 
 Collocation allows to force a group to be close or not to another group.
 The very common usage is to define collocation constraint that prevent some
@@ -259,7 +278,7 @@ high_availability_resources:
         score: -INFINITY
 ```
 
-#### Location constraint
+#### 2.4.2. Location constraint
 
 Location allows to set a preferred node for a group of resources. This can be
 useful to ensure a good load balancing between the ha cluster nodes.
@@ -283,7 +302,7 @@ high_availability_resources:
 
 Type can be `prefers` and `avoids`.
 
-### Stonith
+### 2.5. Stonith
 
 Stonith (for "Shoot The Other Node In The Head") allows to prevent issues when a
 node of the cluster is not working as expected or is unsynchronized with others.
@@ -303,13 +322,49 @@ high_availability_stonith:
     avoids: ha1                                                        # Avoid resource to be running on own host
 ```
 
-### List of standard resources
+## 3. Deploy HA
+
+The HA cluster is expected to have an active-passive configuration.
+The structure of this playbook named "ha-cluster.yml" can be used as a starting
+point:
+
+```yaml
+- name: Roles for HA cluster
+  hosts: "ha_cluster"
+  vars:
+    enable_services: false
+    start_services: false
+  roles:
+    - (add roles to configure services in HA cluster)
+    - role: high_availability
+      tags: ha
+```
+
+By doing this, all ha compatible roles services will be disabled and not started.
+Then HA cluster will be deployed, and populated with resources and properties.
+
+First, start by configuring services in active mode on the reference node,
+ set to ha1 for this example:
+
+```
+ansible-playbook ha-cluster.yml --limit ha1 --skip-tags ha -e "{'start_services': true}"
+```
+
+Now, deploy the HA cluster with the configured parameters, by running the full
+playbook on all nodes. Note that other nodes will get the passive configuration,
+so this playbook can be safely executed multiple times:
+
+```
+ansible-playbook ha-cluster.yml
+```
+
+## 4. List of standard resources
 
 Bellow is a list of standard resources to be used with BlueBanquise. Note that
 it can/must be adapted to needs (other kind of FS, multiple vip to handle multiple
   subnets, etc.).
 
-#### Repositories and PXE
+### 4.1. Repositories and PXE
 
 Since both repositories and PXE share the same service (http server), these must
 be combined together in a same group.
@@ -330,16 +385,16 @@ So at the end, you need for this part 2 available FS shared between nodes, here
       arguments: "device='/dev/repositories' directory='/var/www/html/repositories/' fstype='ext4'"
     - id: fs-pxe
       type: Filesystem
-      arguments: "device='/dev/pxe' directory='/var/www/html/preboot_execution_environment/' fstype='ext4'"
+      arguments: "device='/dev/pxe' directory='/exports/pxe/' fstype='ext4'"
     - id: vip-http
       type: IPaddr2
       arguments: "ip=10.10.77.1 cidr_netmask=255.255.0.0"
     - id: nfs-daemon-http
       type: nfsserver
-      arguments: "nfs_shared_infodir=/var/www/html/preboot_execution_environment/nfsinfo nfs_no_notify=true"
+      arguments: "nfs_shared_infodir=/exports/pxe/nfsinfo nfs_no_notify=true"
     - id: nfs-export-pxe
       type: exportfs
-      arguments: "clientspec=* options=rw,sync,no_root_squash directory=/var/www/html/preboot_execution_environment/ fsid=0"
+      arguments: "clientspec=* options=rw,sync,no_root_squash directory=/exports/pxe/ fsid=0"
     - id: service-http
       type: systemd:httpd
     - id: service-tftp
@@ -349,23 +404,19 @@ So at the end, you need for this part 2 available FS shared between nodes, here
   resources:
     - id: nfs-mount-pxe
       type: Filesystem
-      arguments: "device=10.10.77.1:/var/www/html/preboot_execution_environment/ directory=/var/www/html/preboot_execution_environment/ fstype=nfs clone interleave=true"
-  colocations:
-    - slave: http
-      score: -INFINITY
+      arguments: "device=10.10.77.1:/exports/pxe/ directory=/var/www/html/preboot_execution_environment/ fstype=nfs clone interleave=true"
 ```
 
 So you should see something like this at the end for nfs-mount-pxe:
 
 ```
 * Clone Set: nfs-mount-pxe-clone [nfs-mount-pxe]:
-  * Started: [ ha2 ]
-  * Stopped: [ ha1 ]
+  * Started: [ ha1 ha2 ]
 ```
 
-Where all nodes mount the nfs volume except one.
+Where all nodes mount the nfs volumeZ.
 
-#### DHCP server
+### 4.2. DHCP server
 
 DHCP server do not need a virtual ip, expect for very specific cases.
 Resource is simple to declare as only dhcp service is needed.
@@ -377,7 +428,7 @@ Resource is simple to declare as only dhcp service is needed.
       type: systemd:dhcpd
 ```
 
-#### DNS server
+### 4.3. DNS server
 
 DNS server need a virtual ip, and the dns service.
 
@@ -391,7 +442,7 @@ DNS server need a virtual ip, and the dns service.
       type: systemd:named
 ```
 
-#### Time server
+### 4.4. Time server
 
 Time server is a bit tricky.
 Chrony daemon is running on both clients and servers, and is using the same
@@ -449,7 +500,7 @@ not present. Then in HA resources, declare the following:
       score: -INFINITY
 ```
 
-#### Log server
+### 4.5. Log server
 
 Log server act as time server, you need to create 2 files, one for server and
 one for client.
@@ -503,6 +554,6 @@ not present. Then in HA resources, declare the following:
       score: -INFINITY
 ```
 
-## Changelog
+## 5. Changelog
 
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

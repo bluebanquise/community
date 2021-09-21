@@ -10,7 +10,7 @@
     - corosync
     - pcs
     - fence-agents-all
-    
+
 - name: group █ Create cluster system group
   group:
     name: haclient
@@ -105,7 +105,7 @@
 
     - name: command █ Set properties
       command: "pcs property set {{ item.name }}={{ item.value }}"
-      loop: "{{phigh_availability_pcs_propert | default([]) }}"
+      loop: "{{high_availability_pcs_propert | default([]) }}"
       when:
         - (pcs_property.stdout_lines | select("match", ".*"+item.name+":\\s"+(item.value|string)+".*") | list | length) < 1
 
