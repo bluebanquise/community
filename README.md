@@ -20,6 +20,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | grafana               | Install Grafana                                          | @oxedions       | [link](roles/grafana/)              |
 | lmod                  | Install and configure Lmod                               | @oxedions       | [link](roles/lmod/)                 |
 | nhc                   | Install and configure LBNL Node Health Check             | @oxedions       | [link](roles/nhc/)                  |
+| nvidia                | Install Nvidia driver and Cuda                           | @oxedions       | [link](roles/nvidia/)               |
 | ofed                  | Install OFED OpenFabrics                                 | @oxedions       | [link](roles/ofed/)                 |
 | openldap              | Install and configure OpenLDAP and SSSD (beta)           | @oxedions       | [link](roles/openldap/)             |
 | prometheus            | Install and configure Prometheus monitoring and alerting | @oxedions       | [link](roles/prometheus/)           |
