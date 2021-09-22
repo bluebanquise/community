@@ -40,6 +40,7 @@ scrape_configs:
 {% endfor %}
 
 # GENERIC GROUP EXPORTER
+{% if prometheus_exporters_groups_to_scrape is mapping %}
 {% for exporter_group, exporter_group_vars in prometheus_exporters_groups_to_scrape.items() %}
   {% for exporter in exporter_group_vars %}
     {% if exporter.port is defined %}
@@ -53,6 +54,7 @@ scrape_configs:
     {% endif %}
   {% endfor %}
 {% endfor %}
+{% endif %}
 
 # SNMP_EXPORTER
 {% for equipment in  prometheus_snmp_scrape_equipment_profiles %}

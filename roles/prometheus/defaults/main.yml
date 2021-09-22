@@ -6,8 +6,8 @@ prometheus_server_manage_prometheus: true
 prometheus_server_manage_alertmanager: true
 prometheus_server_manage_karma: true
 prometheus_server_manage_am_executor: false
-prometheus_server_manage_ipmi: false
-prometheus_server_manage_snmp: false
+prometheus_server_manage_ipmi_exporter: false
+prometheus_server_manage_snmp_exporter: false
 
 prometheus_server_prometheus_host: localhost
 prometheus_server_alertmanager_host: localhost
@@ -45,7 +45,7 @@ prometheus_server_configuration_global:
 prometheus_server_prometheus_raw_jobs:
 prometheus_server_prometheus_raw_configuration:
 
-prometheus_server_additional_alerts:
+prometheus_server_additional_alerts: []
 prometheus_server_custom_alerts:
 
 prometheus_server_alertmanager_raw_configuration:

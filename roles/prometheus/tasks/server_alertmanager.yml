@@ -7,7 +7,7 @@
 - name: template █ Generate alertmanager service file
   template:
     src: alertmanager.service.j2
-    dest: /etc/systemd/system/prometheus.service
+    dest: /etc/systemd/system/alertmanager.service
     owner: root
     group: root
     mode: 0755
@@ -64,6 +64,7 @@
   notify: service █ Restart alertmanager service
   tags:
     - template
+    - tyty
 
 - meta: flush_handlers
 

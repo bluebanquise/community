@@ -28,3 +28,10 @@
   when: prometheus_server_manage_ipmi_exporter
   tags:
     - internal
+
+- name: include_tasks ░ Setup snmp_exporter
+  include_tasks: "server_snmp_exporter.yml"
+  when: prometheus_server_manage_snmp_exporter
+  tags:
+    - internal
+
