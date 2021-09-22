@@ -43,8 +43,8 @@
 
     - name: command █ Register nodes
       command: "pcs host auth {{ item.name }} -u hacluster -p root"
-      loop: "{{high_availability_cluster_nodes}}"
-      when: (pcs_known_hosts.stdout_lines | select("match", ".*"+item.name+".*") | list | length) < 1
+      loop: "{{ high_availability_cluster_nodes }}"
+      when: ( pcs_known_hosts.stdout_lines | select("match", ".*"+item.name+".*") | list | length ) < 1
 
     - name: command █ Check cluster exist
       command: "cat /etc/corosync/corosync.conf"
@@ -54,9 +54,9 @@
 
     - name: command █ Register reference node
       command: "pcs cluster setup ha_cluster {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %}"
-      loop: "{{high_availability_cluster_nodes}}"
+      loop: "{{ high_availability_cluster_nodes }}"
       when:
-        - (corosync_known_hosts.stdout_lines | select("match", ".*"+high_availability_reference_node+".*") | list | length) < 1
+        - ( corosync_known_hosts.stdout_lines | select("match", ".*"+high_availability_reference_node+".*") | list | length ) < 1
         - item.name == "{{ high_availability_reference_node }}"
 
     - name: command █ Check nodes already in corosync
@@ -67,14 +67,14 @@
 
     - name: command █ Register other nodes
       command: "pcs cluster node add {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %} --force"
-      loop: "{{high_availability_cluster_nodes}}"
+      loop: "{{ high_availability_cluster_nodes }}"
       when:
-        - (corosync_known_hosts.stdout_lines | select("match", ".*name:\\s"+item.name+".*") | list | length) < 1
+        - ( corosync_known_hosts.stdout_lines | select("match", ".*name:\\s"+item.name+".*") | list | length ) < 1
         - item.name != "{{ high_availability_reference_node }}"
 
 - name: service █ Enable and start cluster
   service:
-    name: "{{item}}"
+    name: "{{ item }}"
     enabled: true
     state: started
   loop:
@@ -105,9 +105,9 @@
 
     - name: command █ Set properties
       command: "pcs property set {{ item.name }}={{ item.value }}"
-      loop: "{{high_availability_pcs_propert | default([]) }}"
+      loop: "{{ high_availability_pcs_property | default([]) }}"
       when:
-        - (pcs_property.stdout_lines | select("match", ".*"+item.name+":\\s"+(item.value|string)+".*") | list | length) < 1
+        - ( pcs_property.stdout_lines | select("match", ".*"+item.name+":\\s"+(item.value|string)+".*" ) | list | length) < 1
 
     - name: command █ Check cluster resource op defaults
       command: "pcs resource op defaults"
@@ -119,7 +119,7 @@
       command: "pcs resource op defaults update {{ item.name }}={{ item.value }}"
       loop: "{{ high_availability_pcs_resource_op_defaults | default([]) }}"
       when:
-        - (pcs_resource_op_defaults.stdout_lines | select("match", ".*"+item.name+"="+(item.value|string)+".*") | list | length) < 1
+        - ( pcs_resource_op_defaults.stdout_lines | select("match", ".*"+item.name+"="+(item.value|string)+".*") | list | length ) < 1
 
     - name: command █ Check cluster resource defaults
       command: "pcs resource defaults"
@@ -131,7 +131,7 @@
       command: "pcs resource defaults update {{ item.name }}={{ item.value }}"
       loop: "{{ high_availability_pcs_resource_defaults | default([]) }}"
       when:
-        - (pcs_resource_defaults.stdout_lines | select("match", ".*"+item.name+"="+(item.value|string)+".*") | list | length) < 1
+        - ( pcs_resource_defaults.stdout_lines | select("match", ".*"+item.name+"="+(item.value|string)+".*") | list | length ) < 1
 
     - name: command █ Store current configuration into cib file
       command: "pcs cluster cib {{ high_availability_cib_file_path }}"
@@ -206,9 +206,4 @@
       when: high_availability_stonith is defined and high_availability_stonith
       notify: command █ Push HA configuration
 
-    - name: command █ Disable stonith if it is not configured
-      command: "pcs -f {{ high_availability_cib_file_path }} property set stonith-enabled=false"
-      when:
-        - (pcs_property.stdout_lines | select("match", ".*stonith-enabled:\\sfalse.*") | list | length) == 0
-        - high_availability_stonith is not defined or not high_availability_stonith
 - meta: flush_handlers
