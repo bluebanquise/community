@@ -377,15 +377,41 @@ to be set for each equipment_profile that needs ipmi data scraping.
 
 Since Prometheus ecosystem has been originally designed to run into containers,
 some major parameters are passed to the binary at launch. This is why the current
-role can update the systemd service file to integrate custom launch parameters.
-Use variable **prometheus_server_launch_parameters** to achieve this.
+role generate the systemd service file to integrate custom launch parameters.
+
+The following variables, with their default values shown here, are available
+to tune launch parameters of each tool:
+
+```yaml
+prometheus_server_launch_parameters: |
+  --config.file /etc/prometheus/prometheus.yml \
+  --storage.tsdb.path /var/lib/prometheus/ \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS
+
+alertmanager_launch_parameters: |
+  --config.file=/etc/alertmanager/alertmanager.yml
+
+karma_launch_parameters: |
+  --config.file=/etc/karma/karma.yml
+
+ipmi_exporter_launch_parameters: |
+  --config.file=/etc/ipmi_exporter/ipmi_config.yml
+
+snmp_exporter_launch_parameters: |
+  --config.file=/etc/snmp_exporter/snmp.yml
+```
 
 For example, to manipulate data retention (default 15 days) and ask for 60 days,
 set this variable:
 
 ```yaml
-prometheus_server_launch_parameters:
-  storage.tsdb.retention.time: 60d
+prometheus_server_launch_parameters: |
+  --storage.tsdb.retention.time 60d \
+  --config.file /etc/prometheus/prometheus.yml \
+  --storage.tsdb.path /var/lib/prometheus/ \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS
 ```
 
 Note that with recent version of Prometheus, you can also set the data base
@@ -395,9 +421,13 @@ Another example, to manipulate database path, combine with a 60 days retention,
 set:
 
 ```yaml
-prometheus_server_launch_parameters:
-  storage.tsdb.retention.time: 60d
-  storage.tsdb.path: /prometheus
+prometheus_server_launch_parameters: |
+  --storage.tsdb.pat /prometheus \
+  --storage.tsdb.retention.time 60d \
+  --config.file /etc/prometheus/prometheus.yml \
+  --storage.tsdb.path /var/lib/prometheus/ \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS
 ```
 
 Etc. See all available options at https://gist.github.com/0x0I/eec137d55a26a16d836b84cbc186ab52 .
