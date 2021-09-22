@@ -207,7 +207,7 @@ variable, called **prometheus_server_alertmanager_raw_configuration**. The defau
 content is the following:
 
 ```yaml
-prometheus_server_alertmanager_raw_configuration: |
+prometheus_server_alertmanager_raw_configuration:
   global:
     smtp_smarthost: 'localhost:25'
     smtp_from: 'alertmanager@your_domain'
@@ -223,7 +223,7 @@ prometheus_server_alertmanager_raw_configuration: |
   receivers:
     - name: 'sys-admin-team'
       email_configs:
-        - to: 'sys-admin-team@site.com'
+        - to: 'sys-admin-team@bluebanquise.com'
 
   inhibit_rules:
   - source_match:
