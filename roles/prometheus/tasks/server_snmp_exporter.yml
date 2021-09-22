@@ -1,4 +1,21 @@
 ---
+
+- name: stat ░ Check if file /etc/snmp_exporter/snmp.yml exist
+  stat:
+    path: /etc/snmp_exporter/snmp.yml
+  register: prometheus_snmp_file_exist
+
+- name: assert ░ Assert /etc/snmp_exporter/snmp.yml is present
+  assert:
+    that:
+      - prometheus_snmp_file_exist.stat.exists
+    fail_msg: |
+      File /etc/snmp_exporter/snmp.yml is not present.
+      Please refer to main documentation on how to generate this file, then
+      re-execute this role.
+      Exiting.
+    success_msg: "/etc/snmp_exporter/snmp.yml is present, proceeding..."
+
 - name: Package █ Install snmp_exporter package
   package:
     name: snmp_exporter

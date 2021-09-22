@@ -64,11 +64,11 @@ prometheus_server_alertmanager_raw_configuration:
       email_configs:
         - to: 'sys-admin-team@site.com'
   inhibit_rules:
-  - source_match:
-      severity: 'critical'
-    target_match:
-      severity: 'warning'
-    equal: ['alertname', 'cluster', 'service']
+    - source_match:
+        severity: 'critical'
+      target_match:
+        severity: 'warning'
+      equal: ['alertname', 'cluster', 'service']
 
 prometheus_exporters_groups_to_scrape: []
 prometheus_exporters_to_scrape: []
