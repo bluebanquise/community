@@ -82,7 +82,7 @@
     - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
     - inventory_hostname != worker_cluster_rabbitmq_reference_node
 
-#### Automate
+#### Automate (Flask and Celery)
 
 - name: copy █ Copy automate main file to /usr/local/bin/bbautomate
   copy:
@@ -95,18 +95,30 @@
     - service █ Restart bbautomate_flask service
     - service █ Restart bbautomate_celery service
 
-- name: template █ Generate bbautomate_flask service file
+- name: template █ Generate tasks list /etc/automate/tasks.yml
+  template:
+    src: tasks.yml.j2
+    dest: /etc/systemd/system/bbautomate_celery.service
+    owner: root
+    group: root
+    mode: 0755
+  tags:
+    - template
+
+- name: copy █ Generate bbautomate_flask service file
   copy:
     src: bbautomate_flask.service
     dest: /etc/systemd/system/bbautomate_flask.service
     owner: root
     group: root
     mode: 0755
-  notify: systemd █ Reload systemd configuration
+  notify:
+    - service █ Restart bbautomate_flask service
+    - service █ Restart bbautomate_celery service
   tags:
     - template
 
-- name: template █ Generate bbautomate_celery service file
+- name: copy █ Generate bbautomate_celery service file
   copy:
     src: bbautomate_celery.service
     dest: /etc/systemd/system/bbautomate_celery.service
