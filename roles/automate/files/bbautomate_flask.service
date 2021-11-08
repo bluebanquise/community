@@ -1,0 +1,14 @@
+[Unit]
+  Description=bbautomate_flask
+  Wants=network-online.target
+  After=network-online.target
+
+[Service]
+  User=celery
+  Group=celery
+  Type=simple
+  WorkingDirectory=/var/lib/flask
+  ExecStart=/usr/bin/python3 /usr/local/bin/bbautomate
+
+[Install]
+  WantedBy=multi-user.target

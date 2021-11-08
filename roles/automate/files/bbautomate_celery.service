@@ -1,0 +1,14 @@
+[Unit]
+  Description=bbautomate_celery
+  Wants=network-online.target
+  After=network-online.target
+
+[Service]
+  User=celery
+  Group=celery
+  Type=simple
+  WorkingDirectory=/var/lib/celery
+  ExecStart=celery -A /usr/local/bin/bbautomate.celery worker --loglevel=info
+
+[Install]
+  WantedBy=multi-user.target

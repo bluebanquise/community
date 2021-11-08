@@ -9,6 +9,7 @@
 #
 # https://github.com/bluebanquise/
 # Benoit Leveugle <benoit.leveugle@gmail.com>
+# 1.0.1
 
 from flask import Flask, request, jsonify
 from celery import Celery
@@ -45,8 +46,6 @@ app.config['CELERY_BROKER_URL'] = 'pyamqp://root:root@localhost//'
 
 celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
-
-
 
 ##############################################################################
 ########### FLASK
@@ -165,13 +164,38 @@ def celery_execute_task(task_data, tasks_list, counters):
 ##############################################################################
 
 if __name__ == '__main__':
+
+    print("""\
+
+                  ....,,
+                .::o::;'          .....
+               ::::::::        .::::o:::.,
+              .::' `:::        :::::::''"
+              :::     :       ::'   `.
+             .:::     :       :'      ::
+            .:::       :     ,:       `::
+           .' :        :`. ." :        :::
+          .' .:        :  :  .:        : :
+          : ::'        ::. :' :        : :
+          :: :         :`: :  :        :`:
+          :  :         :  ''  :        : '
+        _.---:         :___   :        :
+             :        :`   `--:        :
+        l42   : :---: :        : :---: :`---.
+              '```  '```      '''   ''''
+
+                BlueBanquise Automate
+                        1.0.1
+                   Benoit LEVEUGLE
+
+                    """)
     # global g_user
     # global g_password
     global tasks_list
     # with open('/etc/worker_cluster/parameters.yml', 'r') as f:
     #     worker_cluster_parameters = yaml.load(f)
-    with open('input.yml', 'r') as f:
-        tasks_list = yaml.load(f)
+    with open('/etc/bbautomate/tasks.yml', 'r') as f:
+        tasks_list = yaml.load(f1, Loader = yaml.FullLoader)
     #g_user = worker_cluster_parameters['http_user']
     #g_password = worker_cluster_parameters['http_password']
     app.run()

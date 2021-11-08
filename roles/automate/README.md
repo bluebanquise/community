@@ -1,4 +1,16 @@
 
+Install needed repositories via rpms:
+
+dnf install -y epel-release
+dnf install -y centos-release-rabbitmq-38
+
+
+
+variables
+worker_cluster_rabbitmq_reference_node
+
+
+
 ```yaml
 deploy_diskless:
   - name: Deploy playbook on diskless node
