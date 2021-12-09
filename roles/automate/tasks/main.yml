@@ -84,10 +84,20 @@
 
 #### Automate (Flask and Celery)
 
+- name: file █ Create automate folder
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0600
+    owner: root
+    group: root
+  loop:
+    - /etc/bbautomate
+
 - name: copy █ Copy automate main file to /usr/local/bin/bbautomate
   copy:
     src: bbautomate.py
-    dest: /usr/local/bin/bbautomate
+    dest: /usr/local/bin/bbautomate.py
     mode: 0755
     owner: root
     group: root
@@ -98,7 +108,7 @@
 - name: template █ Generate tasks list /etc/automate/tasks.yml
   template:
     src: tasks.yml.j2
-    dest: /etc/systemd/system/bbautomate_celery.service
+    dest: /etc/bbautomate/tasks.yml
     owner: root
     group: root
     mode: 0755

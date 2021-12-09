@@ -36,3 +36,19 @@ deploy_node:
     wait_ssh_before_resubmit_on_fail: true
     wait_ssh_before_resubmit_on_fail_max_counter: 30
 ```
+deploy_computes_nodes:
+  - name: bootset and reboot
+    tasks:
+      - command: '"bootset -b osdeploy -n " + task_data["node"]'
+        timeout: 10
+      - command: '"echo I reboot node" + task_data["node"] + ">> /tmp/toto"'
+      - action: wait
+        delay: 5
+  - name: Wait for ssh connectivity
+    tasks:
+      - action: ssh_wait
+        delay: 5
+    retry: 3
+  - name: Deploy playbook once node is back
+    tasks:
+      - command: '"ANSIBLE_CONFIG=/etc/bluebanquise/ansible.cfg ansible-playbook /etc/bluebanquise/playbooks/" + task_data["playbook"] + ".yml --limit " + task_data["node"]'

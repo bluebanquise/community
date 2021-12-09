@@ -4,11 +4,11 @@
   After=network-online.target
 
 [Service]
-  User=celery
-  Group=celery
+  User=root
+  Group=root
   Type=simple
-  WorkingDirectory=/var/lib/flask
-  ExecStart=/usr/bin/python3 /usr/local/bin/bbautomate
+#  WorkingDirectory=/var/lib/flask
+  ExecStart=/usr/bin/python3 /usr/local/bin/bbautomate.py
 
 [Install]
   WantedBy=multi-user.target
