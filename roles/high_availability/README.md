@@ -133,7 +133,7 @@ You can set the reference node in the `ha_parameters.yml`, and on need, use
 high_availability_reference_node: ha1
 ```
 
-Fianly, before deploying HA cluster, update `high_availability_ha_cluster_password` variable with an unencrypted password for hacluster user, and `high_availability_ha_cluster_password_sha512` with the corresponding SHA512 password hash (do not use default values for production).
+Finaly, before deploying HA cluster, update `high_availability_ha_cluster_password` variable with an unencrypted password for hacluster user, and `high_availability_ha_cluster_password_sha512` with the corresponding SHA512 password hash (do not use default values for production).
 
 ```yaml
 high_availability_ha_cluster_password: root
