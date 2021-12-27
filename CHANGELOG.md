@@ -2,11 +2,16 @@
 
 ## 1.0.2 - Next release
 
+### Updated roles
+
+  - prometheus
+    - ensure karma and alertmanager users are created (#46)
+
 ### New roles
 
   - loki. Owner: @neilmunday
 
-## 1.0.1 - Next release
+## 1.0.1
 
 ### Updated roles
 
@@ -19,7 +24,7 @@
     - correct logical operator to run local registry. (#33)
     - quotes in lists of registries. (#34)
 
-## 1.0.0 - Next release
+## 1.0.0
 
 ### New roles
 
