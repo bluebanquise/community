@@ -4,6 +4,19 @@
     name: alertmanager
     state: present
 
+- name: group █ Add alertmanager group
+  group:
+   name: alertmanager
+   state: present
+
+- name: user █ Add alertmanager user
+  user:
+    name: alertmanager
+    shell: /bin/false
+    group: alertmanager
+    system: yes
+    state: present
+
 - name: template █ Generate alertmanager service file
   template:
     src: alertmanager.service.j2

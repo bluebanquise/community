@@ -4,6 +4,19 @@
     name: karma
     state: present
 
+- name: group █ Add karma group
+  group:
+   name: karma
+   state: present
+
+- name: user █ Add karma user
+  user:
+    name: karma
+    shell: /bin/false
+    group: karma
+    system: yes
+    state: present
+
 - name: template █ Generate karma service file
   template:
     src: karma.service.j2
