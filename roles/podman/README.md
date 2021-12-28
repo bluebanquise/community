@@ -4,7 +4,7 @@ Ansible role for setting up [podman](https://podman.io) in Bluebanquise environm
 
 This role is compatible with HA clusters:
 * For active/active configuration please refer to the documentation since you need create 'bundles' to launch your containers: [How to create pacemaker container bundles using podman](https://access.redhat.com/solutions/3871591).
-* For active/passive cluster
+* For active/passive cluster, it is possible to use systemd services to launch containers, and then use pacemaker to manage the systemd containers. An example of this is the registry container deployed by this role. Note that the clients of the registry should use a virtual IP address managed by pacemaker.
 
 ## Supported Platforms
 
@@ -16,6 +16,14 @@ This role is compatible with HA clusters:
 
 Ansible 2.7 or higher is required for defaults/main/*.yml to work correctly.
 
+## Known Limitations
+
+When firewalld is running, containers deployed with podman may lose connectivity if the firewall rules are reloaded with the `firewall-cmd --reload` command, due to non-persistent rules added by podman being lost. As a workaround, the following command should be used after reloading the firewall, it will restore container connectivity without having to re-deploy the containers:
+
+```
+podman network reload --all
+```
+
 ## Variables
 
 Variables for this role:
@@ -26,7 +34,7 @@ Variables for this role:
 | podman_configure_local_registry | False | boolean | starts a default local registry when True |
 | podman_configure_ha | False | boolean | configure podman for a HA cluster |
 | podman_users | { root: '100000:65535' } | dictionary | podman users that get uid mapping configured, those users MUST exist on the system before running this role |
-| podman_manual_mapping | True | boolean | ansible managed /etc/subuid and /etc/subgid entries |
+| podman_manual_mapping | False | boolean | ansible managed /etc/subuid and /etc/subgid entries |
 | podman_search_registries | - 'docker.io' | items | list of registries that podman is pulling images from |
 | podman_insecure_registries | [] | items | non TLS registries for podman, i.e. localhost:5000 |
 | podman_blocked_registries | [] | items | blocked container registries |

@@ -1,4 +1,4 @@
-README.md @oxedions @johnnykeats
+* @oxedions @johnnykeats @neilmunday
 /resources/ @oxedions @johnnykeats
 /roles/advanced_dhcp_server/ @hmeAtos
 /roles/advanced_dns_server/ @oxedions
@@ -7,11 +7,13 @@ README.md @oxedions @johnnykeats
 /roles/conman/ @oxedions
 /roles/display_tuning/ @oxedions
 /roles/generic_psf/ @johnnykeats
-/roles/grafana/ @oxedions
+/roles/grafana/ @strus38
 /roles/lmod/ @oxedions
+/roles/loki/ @neilmunday
 /roles/nhc/ @oxedions
 /roles/ofed/ @oxedions
 /roles/openldap/ @oxedions
+/roles/podman/ @strus38
 /roles/powerman/ @oxedions
 /roles/prometheus/ @oxedions
 /roles/report/ @oxedions
