@@ -1,6 +1,7 @@
 - name: "package █ Install needed packages"
   package:
     name:
+      - python3-packaging
       - python3-celery
       - python3-flask
       - rabbitmq-server
@@ -28,8 +29,8 @@
     state: started
 
 - name: block █ Generate base user
-  run_once: true
-  delegate_to: "{{ worker_cluster_rabbitmq_reference_node }}"
+#  run_once: true
+#  delegate_to: "{{ worker_cluster_rabbitmq_reference_node }}"
   block:
 
     - name: command █ Check root user exist
@@ -50,37 +51,39 @@
       command: 'rabbitmqctl set_permissions -p / root ".*" ".*" ".*"'
       when: (rabbitmqctl_list_users.stdout_lines | select("match", "^root.*") | list | length) < 1
 
-- name: command █ Check current cluster status
-  command: "rabbitmqctl cluster_status"
-  register: rabbitmqctl_cluster_status
-  changed_when: False
-  ignore_errors: yes
-  run_once: true
-  delegate_to: "{{ worker_cluster_rabbitmq_reference_node }}"
+# Join to be added later
 
-- name: command █ Stop_app to join reference node
-  command: "rabbitmqctl stop_app"
-  when:
-    - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
-    - inventory_hostname != worker_cluster_rabbitmq_reference_node
+#- name: command █ Check current cluster status
+#  command: "rabbitmqctl cluster_status"
+#  register: rabbitmqctl_cluster_status
+#  changed_when: False
+#  ignore_errors: yes
+#  run_once: true
+#  delegate_to: "{{ worker_cluster_rabbitmq_reference_node }}"
 
-- name: command █ Reset configuration before joining reference node
-  command: "rabbitmqctl reset"
-  when:
-    - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
-    - inventory_hostname != worker_cluster_rabbitmq_reference_node
+#- name: command █ Stop_app to join reference node
+#  command: "rabbitmqctl stop_app"
+#  when:
+#    - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
+#    - inventory_hostname != worker_cluster_rabbitmq_reference_node
 
-- name: command █ Join reference node
-  command: "rabbitmqctl join_cluster rabbit@{{ worker_cluster_rabbitmq_reference_node }}"
-  when:
-    - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
-    - inventory_hostname != worker_cluster_rabbitmq_reference_node
+#- name: command █ Reset configuration before joining reference node
+#  command: "rabbitmqctl reset"
+#  when:
+#    - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
+#    - inventory_hostname != worker_cluster_rabbitmq_reference_node
 
-- name: command █ Start app after joining
-  command: "rabbitmqctl start_app"
-  when:
-    - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
-    - inventory_hostname != worker_cluster_rabbitmq_reference_node
+#- name: command █ Join reference node
+#  command: "rabbitmqctl join_cluster rabbit@{{ worker_cluster_rabbitmq_reference_node }}"
+#  when:
+#    - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
+#    - inventory_hostname != worker_cluster_rabbitmq_reference_node
+
+#- name: command █ Start app after joining
+#  command: "rabbitmqctl start_app"
+#  when:
+#    - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
+#    - inventory_hostname != worker_cluster_rabbitmq_reference_node
 
 #### Automate (Flask and Celery)
 
@@ -105,15 +108,15 @@
     - service █ Restart bbautomate_flask service
     - service █ Restart bbautomate_celery service
 
-- name: template █ Generate tasks list /etc/automate/tasks.yml
-  template:
-    src: tasks.yml.j2
-    dest: /etc/bbautomate/tasks.yml
-    owner: root
-    group: root
-    mode: 0755
-  tags:
-    - template
+#- name: template █ Generate tasks list /etc/automate/tasks.yml
+#  template:
+#    src: tasks.yml.j2
+#    dest: /etc/bbautomate/tasks.yml
+#    owner: root
+#    group: root
+#    mode: 0755
+#  tags:
+#    - template
 
 - name: copy █ Generate bbautomate_flask service file
   copy:

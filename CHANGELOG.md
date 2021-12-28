@@ -1,6 +1,12 @@
 # Changelog
 
-## 1.0.0 - Next release
+## 1.0.2
+
+### New roles
+
+  - automate. Owner: @oxedions
+
+## 1.0.0
 
 ### New roles
 
