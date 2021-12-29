@@ -1,4 +1,19 @@
 ---
+- name: group █ Add ipmi_exporter group
+  group:
+    name: ipmi_exporter
+    gid: "{{ prometheus_server_ipmi_exporter_user_gid }}"
+    state: present
+
+- name: user █ Add ipmi_exporter user
+  user:
+    name: ipmi_exporter
+    shell: /bin/false
+    uid: "{{ prometheus_server_ipmi_exporter_user_uid }}"
+    group: ipmi_exporter
+    home: /var/lib/ipmi_exporter
+    state: present
+
 - name: Package █ Install ipmi_exporter and freeipmi packages
   package:
     name: "{{ item }}"
