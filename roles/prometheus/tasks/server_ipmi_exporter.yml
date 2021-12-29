@@ -19,7 +19,7 @@
     name: "{{ item }}"
     state: present
   loop:
-    - ipmi_exporter
+    - ipmi-exporter
     - freeipmi
 
 - name: template █ Generate ipmi_exporter service file

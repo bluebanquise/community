@@ -9,6 +9,7 @@
   group:
     name: "{{ item.group }}"
     gid: "{{ item.gid | default(omit) }}"
+    system: yes
     state: present
   loop: "{{ exporters_groups }}"
   when: item.group is defined
@@ -20,6 +21,7 @@
     uid: "{{ item.uid | default(omit) }}"
     group: "{{ item.group | default(omit) }}"
     home: "{{ item.home | default('/var/lib/'+item.user) }}"
+    system: yes
     state: present
   loop: "{{ exporters_groups }}"
   when: item.user is defined
@@ -41,6 +43,15 @@
   notify: systemd █ Reload systemd configuration
   loop: "{{ exporters_groups }}"
   when: item.service is defined
+
+- name: file █ Create exporters working directories
+  file:
+    path: "/etc/{{ item.service }}/"
+    state: directory
+    mode: 0755
+    owner: "{{ item.user | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+  loop: "{{ exporters_groups }}"
 
 - meta: flush_handlers
 
