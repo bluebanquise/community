@@ -10,6 +10,7 @@
 ### New roles
 
   - loki. Owner: @neilmunday
+  - automate. Owner: @oxedions
 
 ## 1.0.1
 
