@@ -1,20 +1,21 @@
 ---
-- name: Package █ Install alertmanager package
-  package:
-    name: alertmanager
-    state: present
-
 - name: group █ Add alertmanager group
   group:
    name: alertmanager
+   gid: "{{ prometheus_server_alertmanager_user_gid }}"
    state: present
 
 - name: user █ Add alertmanager user
   user:
     name: alertmanager
     shell: /bin/false
+    uid: "{{ prometheus_server_alertmanager_user_gid }}"
     group: alertmanager
-    system: yes
+    state: present
+
+- name: Package █ Install alertmanager package
+  package:
+    name: alertmanager
     state: present
 
 - name: template █ Generate alertmanager service file

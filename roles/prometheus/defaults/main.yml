@@ -18,6 +18,10 @@ prometheus_server_snmp_exporter_host: localhost
 
 prometheus_server_prometheus_user_gid: 909
 prometheus_server_prometheus_user_uid: 909
+prometheus_server_alertmanager_user_gid: 910
+prometheus_server_alertmanager_user_uid: 910
+prometheus_server_karma_user_gid: 911
+prometheus_server_karma_user_uid: 911
 
 prometheus_server_launch_parameters: |
   --config.file /etc/prometheus/prometheus.yml \
