@@ -9,7 +9,7 @@
   user:
     name: alertmanager
     shell: /bin/false
-    uid: "{{ prometheus_server_alertmanager_user_gid }}"
+    uid: "{{ prometheus_server_alertmanager_user_uid }}"
     group: alertmanager
     state: present
 
