@@ -79,7 +79,6 @@
   notify: service █ Restart alertmanager service
   tags:
     - template
-    - tyty
 
 - meta: flush_handlers
 

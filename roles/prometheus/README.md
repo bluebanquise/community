@@ -1,6 +1,6 @@
 # Prometheus
 
-Note: this role comply with BlueBanquise data-model 1.0.0.
+Note: this role comply with BlueBanquise data-model 1.0.0 (https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md).
 
 Table of content:
 
@@ -245,7 +245,7 @@ or to [this page](https://www.robustperception.io/whats-the-difference-between-g
 
 Few Karma parameters can be defined if needed.
 
-To set kerma username and password, use:
+To set karma username and password, use:
 
 ```yaml
 prometheus_server_karma_username: admin
@@ -545,6 +545,7 @@ prometheus_server_prometheus_raw_configuration:
 
 ## Changelog
 
+* 1.2.1: Add missing part of the role. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Role global enhancement. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>, johnnykeats <johnny.keats@outlook.com>

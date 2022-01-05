@@ -43,6 +43,8 @@
   notify: systemd █ Reload systemd configuration
   loop: "{{ exporters_groups }}"
   when: item.service is defined
+  tags:
+    - template
 
 - name: file █ Create exporters working directories
   file:
@@ -77,3 +79,5 @@
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
   loop: "{{ exporters_groups }}"
   when: item.service is defined and item.service is not none
+  tags:
+    - service
