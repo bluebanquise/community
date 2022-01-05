@@ -373,8 +373,8 @@ prometheus_server_manage_snmp: false
 ```
 
 You then need to specify which equipment_profile groups of nodes have to be
-ipmi scraped. To do so, simply set the `prometheus_ipmi_scrape_equipment_profiles`
-variable:
+ipmi scraped. To do so, simply set the global variable `prometheus_ipmi_scrape_equipment_profiles` 
+in the default *inventory/group_vars/all/prometheus.yml* file:
 
 ```yaml
 prometheus_ipmi_scrape_equipment_profiles:
