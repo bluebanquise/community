@@ -6,18 +6,15 @@ slurm_packages_to_install:
     - libmunge2
     - slurm
     - slurm-devel
-    - slurm-pam-slurm
     - slurm-slurmctld
   accounting:
-    - libmariadb3
-    - mariadb-common
+    - mariadb
     - mariadb-server
-#    - python3-mysql
+    - python3-mysql
     - slurm-slurmdbd
   compute:
     - munge
     - libmunge2
-    - slurm-pam-slurm
     - slurm
     - slurm-devel
     - slurm-slurmd
