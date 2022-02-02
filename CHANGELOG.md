@@ -7,6 +7,10 @@
   - loki. Owner: @neilmunday
   - automate. Owner: @oxedions
 
+### Updated roles
+
+  - slurm: missing string filter in templates
+
 ## 1.0.1
 
 ### Updated roles
