@@ -7,6 +7,11 @@
   - loki. Owner: @neilmunday
   - automate. Owner: @oxedions
 
+### Updated roles
+
+  - prometheus:
+    - fixed typo in datasource url var name; removed problematic firewall check (#57)
+
 ## 1.0.1
 
 ### Updated roles
@@ -19,7 +24,7 @@
     - enable/disable STONITH when configuration is available/unavailable (#43)
     - fix use of unencrypted password of hacluster user (#45)
 
-  - podman: 
+  - podman:
     - correct logical operator to run local registry. (#33)
     - quotes in lists of registries. (#34)
 
