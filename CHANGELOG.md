@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.2 - Next release
+## 1.5.0 - Next release
 
 ### New roles
 
@@ -9,8 +9,8 @@
 
 ### Updated roles
 
-  - prometheus:
-    - fixed typo in datasource url var name; removed problematic firewall check (#57)
+  - slurm: missing string filter in templates
+  - prometheus: update ubuntu support
 
 ## 1.0.1
 
