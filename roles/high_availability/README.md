@@ -582,6 +582,7 @@ not present. Then in HA resources, declare the following:
 
 ## 5. Changelog
 
+* 1.0.4: Allows order constraint between resource groups. Thiago Cardozo <thiago.cardozo@yahoo.com.br>
 * 1.0.3: Fix use of unencrypted password of hacluster user. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.2: Enable/disable STONITH when configuration is available/unavailable. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.1: Configure firewall before pcs commands. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
