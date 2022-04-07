@@ -1,6 +1,13 @@
 # Changelog
 
-## 1.5.0 - Next release
+## 1.5.1
+
+### Updated roles
+
+  - grafana:
+    - Fix varname and removed firewall running check (#57)
+
+## 1.5.0
 
 ### New roles
 
