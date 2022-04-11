@@ -16,12 +16,12 @@
 
 - name: install ░ Check for log file
   stat:
-    path: /var/log/grafana/grafana.log
+    path: "{{ grafana_logs_dir }}"
   register: log_exists
 
 - name: install █ Change log owner
   file:
-    path: /var/log/grafana/grafana.log
+    path: "{{ grafana_logs_dir }}"
     owner: "{{ grafana_user_uid }}"
     group: "{{ grafana_user_gid }}"
   when: log_exists.stat.exists == true
