@@ -5,7 +5,7 @@
 
   tasks:
     - name: "Install firewalld and net-tools"
-      pansible.builtin.ackage:
+      package:
         name: "{{ item }}"
       when: ansible_facts.os_family == "RedHat"
       with_items:
@@ -13,9 +13,9 @@
         - net-tools
 
     - name: "Start firewalld"
-      ansible.builtin.service:
+      service:
         name: firewalld
         state: started
-      when:
+      when: 
         - ansible_facts.os_family == "RedHat"
-        - ansible_facts.services['firewalld'] is defined
+        - ansible_facts.services['firewalld'] is defined    
