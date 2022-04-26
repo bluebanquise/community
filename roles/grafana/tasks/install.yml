@@ -15,12 +15,12 @@
     state: present
 
 - name: install ░ Check for log file
-  stat:
+  ansbile.builtin.stat:
     path: "{{ grafana_logs_dir }}"
   register: log_exists
 
 - name: install █ Change log owner
-  file:
+  ansible.builtin.file:
     path: "{{ grafana_logs_dir }}"
     owner: "{{ grafana_user_uid }}"
     group: "{{ grafana_user_gid }}"
