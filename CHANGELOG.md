@@ -6,6 +6,8 @@
 
   - grafana:
     - fix log file permissions (#59)
+  - high_availability:
+    - Allows order constraint between resource groups (#58)
 
 ## 1.5.0
 
