@@ -24,7 +24,7 @@
     path: "{{ grafana_logs_dir }}"
     owner: "{{ grafana_user_uid }}"
     group: "{{ grafana_user_gid }}"
-  when: log_exists.stat.exists == true
+  when: log_exists.stat.exists
 
 - name: "install █ Add services to firewall's {{ grafana_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
