@@ -15,7 +15,7 @@
     state: present
 
 - name: install ░ Check for log file
-  ansbile.builtin.stat:
+  ansible.builtin.stat:
     path: "{{ grafana_logs_dir }}"
   register: log_exists
 
