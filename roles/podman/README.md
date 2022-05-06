@@ -123,5 +123,5 @@ podman_local_registry_group: "root"
 
 ## Changelog
 
-* 1.0.1: Use slirp4netns to avoid error with HA (#65). Giacomo Mc Evoy <gino.mcevoy@gmail.com>
+* 1.0.1: Use slirp4netns to avoid error with HA. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.0: Role creation. @strus38
