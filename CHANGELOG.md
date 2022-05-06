@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6
+
+### Updated roles
+
+  - high_availability:
+    - Allow specification of name of the cluster (#66)
+
 ## 1.5.1
 
 ### Updated roles
