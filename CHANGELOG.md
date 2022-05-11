@@ -6,6 +6,8 @@
 
   - high_availability:
     - Allow specification of name of the cluster (#66)
+  - podman:
+    - Use slirp4netns to avoid error with HA (#65)
 
 ## 1.5.1
 
