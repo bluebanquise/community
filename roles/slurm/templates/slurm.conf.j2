@@ -66,7 +66,10 @@ JobAcctGatherType=jobacct_gather/linux
 {% endif %}
 
 ## Additional content if exist
-{{ slurm_slurm_conf_additional_content | default('',true) }}
+{% if slurm_slurm_conf_additional_content is defined and slurm_slurm_conf_additional_content is iterable %}{% for slurm_slurm_conf_content in slurm_slurm_conf_additional_
+content %}
+{{ slurm_slurm_conf_content | default('', true) }}                                                                                                                       
+{% endfor %}{% endif %}
 
 ## Nodes and partitions list
 # Note: in configless mode, only slurm.conf is shipped to slurmds.
