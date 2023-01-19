@@ -2,6 +2,12 @@
 
 ![BlueBanquise Community](resources/pictures/BlueBanquise_Community_logo_large.png)
 
+:triangular_flag_on_post: THIS REPOSITORY IS FROZEN :triangular_flag_on_post:
+
+For any fixs or features, please open issues or PR directly into main bluebanquise repository (https://github.com/bluebanquise/bluebanquise/). All community roles are available into collections folder in main bluebanquise repository.
+
+--------------------
+
 This repository hosts all [internal community driven roles or tools](#internal-community-roles-and-tools) around [**BlueBanquise**](https://github.com/bluebanquise/bluebanquise). These additional roles/tools can be new, or simply forks from the [core stack](https://github.com/bluebanquise/bluebanquise/tree/master/roles).
 
 We also maintain here a [list of external roles and tools](#external-roles-and-tools) known to be working well with BlueBanquise.
